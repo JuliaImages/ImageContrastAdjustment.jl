@@ -1,6 +1,6 @@
 using ImageContrastAdjustment
-using Test
+using Test, ImageCore, ColorTypes, FixedPointNumbers, FileIO
 
 @testset "ImageContrastAdjustment.jl" begin
-    # Write your own tests here.
+    include("contrastadjustment.jl")
 end
