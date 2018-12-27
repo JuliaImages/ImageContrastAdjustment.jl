@@ -1,6 +1,9 @@
 using ImageContrastAdjustment
-using Test
+using Test, ImageCore, ColorTypes, FixedPointNumbers, FileIO, ImageFiltering, TestImages
 
 @testset "ImageContrastAdjustment.jl" begin
-    # Write your own tests here.
+    include("histogram_construction.jl")
+    include("histogram_matching.jl")
+    include("histogram_equalization.jl")
+    include("gamma_adjustment.jl")
 end
