@@ -6,4 +6,5 @@ using Test, ImageCore, ColorTypes, FixedPointNumbers, FileIO, ImageFiltering, Te
     include("histogram_matching.jl")
     include("histogram_equalization.jl")
     include("gamma_adjustment.jl")
+
 end

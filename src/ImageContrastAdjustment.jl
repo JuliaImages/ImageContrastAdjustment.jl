@@ -7,6 +7,7 @@ struct Equalization <: AbstractHistogramOperation end
 struct Matching <: AbstractHistogramOperation end
 struct GammaCorrection <: AbstractHistogramOperation end
 
+
 include("core.jl")
 include("contrastadjustment.jl")
 
@@ -15,7 +16,7 @@ export
 	Equalization,
 	Matching,
 	GammaCorrection,
-    build_histogram,
+  build_histogram,
 	adjust_histogram,
 	adjust_histogram!
 
