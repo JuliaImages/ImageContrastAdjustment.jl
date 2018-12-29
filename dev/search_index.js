@@ -69,7 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "ImageContrastAdjustment.jl Documentation",
     "title": "ImageContrastAdjustment.adjust_histogram!",
     "category": "method",
-    "text": "adjust_histogram!(Equalization(),img, nbins)\nadjust_histogram!(Equalization(),img, nbins, minval, maxval)\n\nSame as adjust_histogram except that it modifies the image that was passed as an argument.\n\n\n\n\n\n"
+    "text": "adjust_histogram!(GammaCorrection(),img, nbins)\nadjust_histogram!(GammaCorrection(),img, nbins, minval, maxval)\n\nSame as adjust_histogram except that it modifies the image that was passed as an argument.\n\n\n\n\n\n"
 },
 
 {
