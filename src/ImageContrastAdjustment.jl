@@ -16,7 +16,7 @@ export
 	Equalization,
 	Matching,
 	GammaCorrection,
-  build_histogram,
+    build_histogram,
 	adjust_histogram,
 	adjust_histogram!
 

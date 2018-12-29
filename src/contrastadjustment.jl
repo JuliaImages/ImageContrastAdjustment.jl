@@ -625,11 +625,11 @@ end
 
 """
 ```
-adjust_histogram!(Equalization(),img, nbins)
-adjust_histogram!(Equalization(),img, nbins, minval, maxval)
+adjust_histogram!(GammaCorrection(),img, nbins)
+adjust_histogram!(GammaCorrection(),img, nbins, minval, maxval)
 ```
 
-Same as [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) except that it modifies the image that was passed as an argument.
+Same as [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection, ::AbstractArray, ::Real)) except that it modifies the image that was passed as an argument.
 """
 function adjust_histogram!(operation::GammaCorrection, img::AbstractArray, gamma::Real = 1.0)
     γ = Float64(gamma)
