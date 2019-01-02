@@ -11,7 +11,7 @@ end
 """
 ```
 edges, count = build_histogram(img, nbins)
-edges, count = build_histogram(img, nbins, minval, maxval)
+edges, count = build_histogram(img, nbins; minval, maxval)
 edges, count = build_histogram(img, edges)
 ```
 
@@ -19,7 +19,7 @@ Generates a histogram for the image over `nbins` spread between `[minval, maxval
 Color images are automatically converted to grayscale.
 
 # Output
-Returns `edges` which is a [`range`](@ref) type that specifies how the  interval
+Returns `edges` which is a [`AbstractRange`](@ref) type that specifies how the  interval
 `[minval, maxval]` is divided into bins, and an array `count` which records the
 concomitant bin frequencies. In particular, `count` has the following
 properties:
@@ -106,7 +106,7 @@ value present in the image is taken as the upper bound.
 ## Choices for `edges`
 If you do not designate the number of bins, nor the lower or upper bound of the
 interval, then you have the option to directly stipulate how the intervals will
-be divided by specifying a [`range`](@ref) type.
+be divided by specifying a [`AbstractRange`](@ref) type.
 
 # Example
 
@@ -116,34 +116,37 @@ Compute the histogram of a grayscale image.
 using TestImages, FileIO, ImageView
 
 img =  testimage("mandril_gray");
-edges, counts  = build_histogram(img,256,0,1)
+edges, counts  = build_histogram(img, 256, minval = 0, maxval = 1)
 ```
 
 Given a color image, compute the histogram of the red channel.
 ```julia
 img = testimage("mandrill")
 r = red.(img)
-edges, counts  = build_histogram(r,256,0,1)
+edges, counts  = build_histogram(r, 256, minval = 0, maxval = 1)
 ```
 
 # References
 [1] E. Herrholz, "Parsimonious Histograms," Ph.D. dissertation, Inst. of Math. and Comp. Sci., University of Greifswald, Greifswald, Germany, 2011.
 
-See also:
+# See also:
 
-| Histogram Equalization                                                                                                                             | Histogram Matching                                                                                     |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|
-| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))    | [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))   |
-| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))  | [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer)) |
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
-function build_histogram(img::AbstractArray, nbins::Integer, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
+function build_histogram(img::AbstractArray, nbins::Integer = 256; minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
     edges = partition_interval(nbins, minval, maxval)
     build_histogram(img, edges)
 end
 
-function build_histogram(img::AbstractArray, nbins::Integer=200)
-    build_histogram(img, nbins, minfinite(img), maxfinite(img))
+function build_histogram(img::AbstractArray, nbins::Integer = 256)
+    build_histogram(img, nbins, minval =  minfinite(img), maxval = maxfinite(img))
 end
 
 function build_histogram(img::AbstractArray{T}, edges::AbstractRange) where {T<:Color3}
@@ -178,7 +181,7 @@ end
 """
 ```
 adjust_histogram(Equalization(),img, nbins)
-adjust_histogram(Equalization(),img, nbins, minval, maxval)
+adjust_histogram(Equalization(),img, nbins; minval, maxval)
 ```
 
 Returns a histogram equalised image with a granularity of `nbins` number of bins.
@@ -260,8 +263,8 @@ If minval and maxval are specified then intensities are equalized to the range
 
 using TestImages, FileIO, ImageView
 
-img =  testimage("mandril_gray");
-imgeq = adjust_histogram(Equalization(),img,256,0,1);
+img =  testimage("mandril_gray")
+imgeq = adjust_histogram(Equalization(),img,256, minval = 0, maxval = 1)
 
 imshow(img)
 imshow(imgeq)
@@ -270,23 +273,26 @@ imshow(imgeq)
 # References
 1. R. C. Gonzalez and R. E. Woods. *Digital Image Processing (3rd Edition)*.  Upper Saddle River, NJ, USA: Prentice-Hall,  2006.
 
-See also:
+# See also:
 
-| Histogram Equalization                                                                                                                             | Histogram Matching                                                                                     | Histogram Construction                                                                                                        |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------:|
-| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))  | [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))   | [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) |
-|                                                                                                                                                    | [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer)) |                                                                                                                               |
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
-function adjust_histogram(operation::Equalization, img::AbstractArray, nbins::Integer, minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1)
-    adjust_histogram!(Equalization(), copy(img), nbins, minval, maxval)
+function adjust_histogram(operation::Equalization, img::AbstractArray, nbins::Integer = 256; minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1)
+    adjust_histogram!(Equalization(), copy(img), nbins, minval = minval, maxval = maxval)
 end
 
 
-function adjust_histogram(operation::Equalization, img::AbstractArray{T}, nbins::Integer, minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1) where {T<:Color3}
+function adjust_histogram(operation::Equalization, img::AbstractArray{T}, nbins::Integer = 256; minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1) where {T<:Color3}
     yiq = convert.(YIQ, img)
     yiq_view = channelview(yiq)
-    adjust_histogram!(Equalization(),view(yiq_view,1,:,:),nbins,minval,maxval)
+    adjust_histogram!(Equalization(), view(yiq_view,1,:,:), nbins, minval = minval, maxval = maxval)
     convert.(T, yiq)
 end
 
@@ -294,13 +300,13 @@ end
 """
 ```
 adjust_histogram!(Equalization(),img, nbins)
-adjust_histogram!(Equalization(),img, nbins, minval, maxval)
+adjust_histogram!(Equalization(),img, nbins; minval, maxval)
 ```
 
 Same as [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) except that it modifies the image that was passed as an argument.
 """
-function adjust_histogram!(operation::Equalization, img::AbstractArray, nbins::Integer, minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1)
-    edges, histogram = build_histogram(img, nbins, minval, maxval)
+function adjust_histogram!(operation::Equalization, img::AbstractArray, nbins::Integer; minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1)
+    edges, histogram = build_histogram(img, nbins, minval = minval, maxval = maxval)
     lb = first(axes(histogram,1))
     ub = last(axes(histogram,1))
     N = length(img)
@@ -402,7 +408,7 @@ specify the number of bins then a default value of 256 bins is utilised.
 ## Choices for `edges`
 
 If you do not designate the number of bins, then you have the option to directly
-stipulate how the intervals will be divided by specifying a [`range`](@ref)
+stipulate how the intervals will be divided by specifying a [`AbstractRange`](@ref)
 type.
 
 # Example
@@ -411,7 +417,7 @@ type.
 using Images, TestImages, ImageView
 
 img_source = testimage("mandril_gray")
-img_target = adjust_gamma(img_source,1/2)
+img_target = adjust_gamma(img_source, 1/2)
 img_transformed = adjust_histogram(Matching(),img_source, img_target)
 #=
     A visual inspection confirms that img_transformed resembles img_target
@@ -426,12 +432,15 @@ imshow(img_transformed)
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 
 
-See also:
+# See also:
 
-| Histogram Equalization                                                                                                                             | Histogram Matching                                                                                    | Histogram Construction                                                                                                        |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------:|
-| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))    | [`adjust_histogram!`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer)) | [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) |
-| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer, ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))  |                                                                                                       |                                                                                                                               |
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 
 """
@@ -491,7 +500,7 @@ function construct_pdfs(img::AbstractArray, targetimg::AbstractArray, nbins::Int
     else
         imin, imax = min(minfinite(img), minfinite(targetimg)), max(maxfinite(img), maxfinite(targetimg))
     end
-    edges, histogram = build_histogram(img, nbins, imin, imax)
+    edges, histogram = build_histogram(img, nbins, minval = imin, maxval = imax)
     _, target_histogram = build_histogram(targetimg, edges)
     return edges, histogram / sum(histogram), target_histogram / sum(target_histogram)
 end
@@ -584,7 +593,9 @@ resulting image converted to the same type as the input.
 
 ## Choice for `gamma`
 
-The `gamma` value must be a non-zero positive number.
+The `gamma` value must be a non-zero positive number. A `gamma` value less than
+one will yield a brighter image whereas a value greater than one will produce a
+darker image. If left unspecified a default value of one is assumed.
 
 # Example
 
@@ -597,7 +608,7 @@ intensities = 0.0:(1.0/n):1.0
 img = repeat(intensities, inner=(20,20))'
 
 # Brighten the dark tones.
-imgadj = adjust_histogram(GammaCorrection(),img,1/2)
+imgadj = adjust_histogram(GammaCorrection(), img, 1/2)
 
 # Display the original and adjusted image.
 imshow(img)
@@ -606,6 +617,16 @@ imshow(imgadj)
 
 # References
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
+
+# See also:
+
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 
 
@@ -618,15 +639,14 @@ end
 function adjust_histogram(operation::GammaCorrection, img::AbstractArray{T}, gamma::Real = 1.0) where {T<:Color3}
     yiq = convert.(YIQ, img)
     yiq_view = channelview(yiq)
-    adjust_histogram!(GammaCorrection(),view(yiq_view,1,:,:), gamma)
+    adjust_histogram!(GammaCorrection(), view(yiq_view,1,:,:), gamma)
     convert.(T, yiq)
 end
 
 
 """
 ```
-adjust_histogram!(GammaCorrection(),img, nbins)
-adjust_histogram!(GammaCorrection(),img, nbins, minval, maxval)
+adjust_histogram!(GammaCorrection(),img, gamma)
 ```
 
 Same as [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection, ::AbstractArray, ::Real)) except that it modifies the image that was passed as an argument.
@@ -638,7 +658,7 @@ function adjust_histogram!(operation::GammaCorrection, img::AbstractArray, gamma
         if isnan(val)
             return val
         else
-            return  T <: Integer ? round(Int,val^γ) : val^γ
+            return  T <: Integer ? round(Int, val^γ) : val^γ
         end
     end
 end
@@ -659,4 +679,213 @@ function adjust_histogram!(operation::GammaCorrection, img::AbstractArray{Gray{T
             return  table[p.val.i + 1]
         end
     end
+end
+
+
+"""
+```
+adjust_histogram(LinearStretching(), img; minval = 0, maxval = 1)
+```
+
+Returns an image where the range of the intensities spans the interval [minval, maxval].
+
+# Details
+
+
+Linear stretching (also called *normalization*) is a contrast enhancing
+transformation that is used to modify the dynamic range of the image. In
+particular, suppose that the input image has gray values in the range [A,B] and
+one wishes to change the dynamic range to [a,b] using a linear mapping, then the
+necessary transformation is given by the relation
+
+```math
+f(x) = (x-A) \\frac{b-a}{B-A} + a.
+```
+
+# Options
+
+Various options for the parameters of this function are described in more detail
+below.
+
+## Choices for `img`
+
+The function can handle a variety of input types. The returned
+image depends on the input type.
+
+For colored images, the input is converted to the
+[YIQ](https://en.wikipedia.org/wiki/YIQ)  type and the intensities of the Y
+channel are stretched to the specified range. The modified Y channel is then
+combined with the I and Q channels and the resulting image converted to the same
+type as the input.
+
+## Choices for `minval` and `maxval`
+
+If minval and maxval are specified then intensities are mapped to the range
+[minval, maxval]. The default values are 0 and 1.
+
+# Example
+
+```julia
+using ImageContrastAdjustment, ImageView, TestImages, Images
+
+img = testimage("mandril_gray")
+imgo = adjust_histogram(LinearStretching(),img, minval = 0, maxval = 1)
+
+```
+
+# References
+1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
+
+# See also:
+
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
+
+"""
+function adjust_histogram(operation::LinearStretching, img::AbstractArray; minval::Union{Real,AbstractGray} = 0.0, maxval::Union{Real,AbstractGray} = 1.0)
+    adjust_histogram!(LinearStretching(), copy(img), minval = minval, maxval = maxval)
+end
+
+"""
+```
+adjust_histogram!(LinearStretching(), img; minval = 0.0, maxval = 1.0)
+```
+
+Same as [`adjust_histogram`](@ref adjust_histogram(::LinearStretching, ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) except that it modifies the image that was passed as an argument.
+"""
+function adjust_histogram!(operation::LinearStretching, img::AbstractArray; minval::Union{Real,AbstractGray} = 0.0, maxval::Union{Real,AbstractGray} = 1.0)
+    src_minval = minfinite(img)
+    src_maxval = maxfinite(img)
+    T = eltype(img)
+    map!(img,img) do val
+        if isnan(val)
+            return val
+        else
+            newval = linear_stretch(val, src_minval, src_maxval, minval, maxval)
+            return  T <: Integer ? round(Int, newval ) : newval
+        end
+    end
+end
+
+function adjust_histogram(operation::LinearStretching, img::AbstractArray{T}; minval::Union{Real,AbstractGray} = 0.0, maxval::Union{Real,AbstractGray} = 1.0) where {T<:Color3}
+    yiq = convert.(YIQ, img)
+    yiq_view = channelview(yiq)
+    adjust_histogram!(LinearStretching(),view(yiq_view,1,:,:), minval = minval, maxval = maxval)
+    convert.(T, yiq)
+end
+
+function linear_stretch(x, A, B, a, b)
+    return (x-A) * ((b-a)/(B-A)) + a
+end
+
+
+
+"""
+```
+adjust_histogram(ContrastStretching(), img; t = 0.5,  slope = 1.0)
+```
+
+Returns an image where intensities intensities below `t` are compressed
+into a narrower range of dark intensities, and values above `t` are compressed
+into a narrower band of light intensities.
+
+# Details
+
+Contrast stretching is a transformation that  enhances or reduces (for slope >
+1 or < 1, respectively) the contrast near saturation (0 and 1).
+It is given by the relation
+```math
+f(x) = \\frac{1}{1 + \\left(\\frac{t}{x} \\right)^s}, \\; s \\in \\mathbb{R},
+```
+where ``s`` represents the `slope` argument.
+
+# Options
+
+Various options for the parameters of this function are described in more detail
+below.
+
+## Choices for `img`
+
+The function can handle a variety of input types. The returned
+image depends on the input type.
+
+For colored images, the input is converted to the
+[YIQ](https://en.wikipedia.org/wiki/YIQ)  type and the intensities of the Y
+channel are stretched to the specified range. The modified Y channel is then
+combined with the I and Q channels and the resulting image converted to the same
+type as the input.
+
+## Choice for `t`
+
+The value of `t` needs to be in the unit interval. If left unspecified a
+default value of 0.5 is utilised.
+
+## Choice for `slope`
+
+The value of `slope` can be any real number. If left unspecified a
+default value of 1.0 is utilised.
+
+# Example
+
+```julia
+using ImageContrastAdjustment, ImageView, Images, TestImages
+
+img = testimage("mandril_gray")
+ret = adjust_histogram(ContrastStretching(),img, t = 0.6, slope = 3)
+
+```
+
+# References
+1. Gonzalez, R. C., Woods, R. E., & Eddins, S. L. (2004). *Digital image processing using MATLAB* (Vol. 624). Upper Saddle River, New Jersey: Pearson-Prentice-Hall.
+
+# See also:
+
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+
+"""
+function adjust_histogram(operation::ContrastStretching, img::AbstractArray; t::Union{Real,AbstractGray} = 0.5, slope::Union{Real,AbstractGray} = 1.0)
+    adjust_histogram!(ContrastStretching(), copy(img), t = t, slope = slope)
+end
+
+
+function adjust_histogram(operation::ContrastStretching, img::AbstractArray{T}; t::Union{Real,AbstractGray} = 0.5, slope::Union{Real,AbstractGray} = 1.0) where {T<:Color3}
+    yiq = convert.(YIQ, img)
+    yiq_view = channelview(yiq)
+    adjust_histogram!(ContrastStretching(),view(yiq_view,1,:,:), t = t, slope = slope)
+    convert.(T, yiq)
+end
+
+"""
+```
+adjust_histogram!(ContrastStretching(),img; t = 0.5, slope = 1.0)
+```
+
+Same as [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching, ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) except that it modifies the image that was passed as an argument.
+"""
+function adjust_histogram!(operation::ContrastStretching, img::AbstractArray; t::Union{Real,AbstractGray} = 0.5, slope::Union{Real,AbstractGray} = 1.0)
+    T = eltype(img)
+    ϵ = eps(T)
+    map!(img,img) do val
+        if isnan(val)
+            return val
+        else
+            newval = contrast_stretch(val, t, slope, ϵ)
+            return  T <: Integer ? round(Int, newval ) : newval
+        end
+    end
+end
+
+function contrast_stretch(x, t, s, ϵ)
+    return 1 / (1 + (t / (x+ϵ))^s)
 end

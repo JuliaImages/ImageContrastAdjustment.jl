@@ -6,6 +6,8 @@ abstract type AbstractHistogramOperation end
 struct Equalization <: AbstractHistogramOperation end
 struct Matching <: AbstractHistogramOperation end
 struct GammaCorrection <: AbstractHistogramOperation end
+struct LinearStretching <: AbstractHistogramOperation end
+struct ContrastStretching <: AbstractHistogramOperation end
 
 
 include("core.jl")
@@ -16,6 +18,8 @@ export
 	Equalization,
 	Matching,
 	GammaCorrection,
+	LinearStretching,
+	ContrastStretching,
     build_histogram,
 	adjust_histogram,
 	adjust_histogram!

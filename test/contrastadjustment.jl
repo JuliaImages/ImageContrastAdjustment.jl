@@ -6,7 +6,7 @@
     bins = [2^i for i = 8:-1:1]
     for i = 1:length(bins)
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
-            edges, counts  = build_histogram(T.(collect(0:1/255:1)),bins[i],0,1)
+            edges, counts  = build_histogram(T.(collect(0:1/255:1)),bins[i], minval = 0, maxval = 1)
             @test length(edges) == length(counts) - 1
             @test all(counts[1:end] .== expected_counts[i]) && counts[0] == 0
             @test axes(counts) == (0:length(edges),)
@@ -16,14 +16,14 @@
         for T in (RGB{N0f8}, RGB{N0f16}, RGB{Float32}, RGB{Float64})
             imgg = collect(0:1/255:1)
             img = colorview(RGB,imgg,imgg,imgg)
-            edges, counts  = build_histogram(T.(img),bins[i],0,1)
+            edges, counts  = build_histogram(T.(img),bins[i], minval = 0, maxval = 1)
             @test length(edges) == length(counts) - 1
             @test all(counts[1:end] .== expected_counts[i]) && counts[0] == 0
             @test axes(counts) == (0:length(edges),)
         end
 
         # Consider also integer-valued images.
-        edges, counts  = build_histogram(0:1:255,bins[i],0,255)
+        edges, counts  = build_histogram(0:1:255,bins[i], minval = 0, maxval = 255)
         @test length(edges) == length(counts) - 1
         @test all(counts[1:end] .== expected_counts[i]) && counts[0] == 0
         @test axes(counts) == (0:length(edges),)
@@ -32,26 +32,26 @@
     # Consider truncated intervals.
     for T in (Int, Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
         if T == Int
-            edges, counts  = build_histogram(0:1:255,4,128,192)
+            edges, counts  = build_histogram(0:1:255, 4, minval = 128, maxval = 192)
             @test length(edges) == length(counts) - 1
             @test collect(counts) == [128; 16; 16; 16; 80]
             @test axes(counts) == (0:length(edges),)
         else
             img = collect(0:1/255:1)
-            edges, counts  = build_histogram(T.(img),4,128/255,192/255)
+            edges, counts  = build_histogram(T.(img), 4, minval = 128/255, maxval = 192/255)
             @test length(edges) == length(counts) - 1
             @test collect(counts) == [128; 16; 16; 16; 80]
             @test axes(counts) == (0:length(edges),)
         end
 
         if T == Int
-            edges, counts  = build_histogram(0:1:255,4,120,140)
+            edges, counts  = build_histogram(0:1:255, 4, minval = 120, maxval = 140)
             @test length(edges) == length(counts) - 1
             @test collect(counts) == [120, 5, 5, 5, 121]
             @test axes(counts) == (0:length(edges),)
         else
             img = collect(0:1/255:1)
-            edges, counts  = build_histogram(T.(img),4,120/255,140/255)
+            edges, counts  = build_histogram(T.(img),4, minval = 120/255, maxval = 140/255)
             @test length(edges) == length(counts) - 1
             @test axes(counts) == (0:length(edges),)
             # Due to roundoff errors the bins are not the same as in the
@@ -69,7 +69,7 @@
     # results will be slightly different depending on the Image type.
     for T in (Int, Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
         if T == Int
-            edges, counts  = build_histogram(200:1:240,4,200,240)
+            edges, counts  = build_histogram(200:1:240, 4, minval = 200, maxval = 240)
 
             @test length(edges) == length(counts) - 1
             @test collect(counts) == [0, 10, 10, 10, 11]
@@ -81,7 +81,7 @@
             @test axes(counts) == (0:length(edges),)
         else
             img = 200/255:1/255:240/255
-            edges, counts  = build_histogram(T.(img),4,200/255,240/255)
+            edges, counts  = build_histogram(T.(img), 4, minval = 200/255, maxval = 240/255)
             @test length(edges) == length(counts) - 1
             if T == Gray{Float32}
                 @test collect(counts) == [0, 10, 10, 10, 11]
@@ -109,7 +109,7 @@
         for T in (Gray{Float32}, Gray{Float64})
             img = collect(0:1/255:1)
             img[j] = NaN
-            edges, counts  = build_histogram(T.(img),256,0,1)
+            edges, counts  = build_histogram(T.(img), 256, minval = 0, maxval = 1)
             target = [1 for k = 1:length(counts)-1]
             target[j] -= 1
             @test length(edges) == length(counts) - 1
