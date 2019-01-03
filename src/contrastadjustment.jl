@@ -19,7 +19,7 @@ Generates a histogram for the image over `nbins` spread between `[minval, maxval
 Color images are automatically converted to grayscale.
 
 # Output
-Returns `edges` which is a [`AbstractRange`](@ref) type that specifies how the  interval
+Returns `edges` which is a `AbstractRange` type that specifies how the  interval
 `[minval, maxval]` is divided into bins, and an array `count` which records the
 concomitant bin frequencies. In particular, `count` has the following
 properties:
@@ -106,7 +106,7 @@ value present in the image is taken as the upper bound.
 ## Choices for `edges`
 If you do not designate the number of bins, nor the lower or upper bound of the
 interval, then you have the option to directly stipulate how the intervals will
-be divided by specifying a [`AbstractRange`](@ref) type.
+be divided by specifying a `AbstractRange` type.
 
 # Example
 
@@ -408,7 +408,7 @@ specify the number of bins then a default value of 256 bins is utilised.
 ## Choices for `edges`
 
 If you do not designate the number of bins, then you have the option to directly
-stipulate how the intervals will be divided by specifying a [`AbstractRange`](@ref)
+stipulate how the intervals will be divided by specifying a `AbstractRange`
 type.
 
 # Example

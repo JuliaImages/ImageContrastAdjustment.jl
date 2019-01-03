@@ -2,6 +2,7 @@ using ImageContrastAdjustment
 using Test, ImageCore, ColorTypes, FixedPointNumbers, FileIO, ImageFiltering, TestImages
 
 @testset "ImageContrastAdjustment.jl" begin
+    include("core.jl")
     include("histogram_construction.jl")
     include("histogram_matching.jl")
     include("histogram_equalization.jl")
