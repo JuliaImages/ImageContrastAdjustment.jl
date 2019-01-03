@@ -17,6 +17,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "#Examples-1",
+    "page": "ImageContrastAdjustment.jl Documentation",
+    "title": "Examples",
+    "category": "section",
+    "text": "Below are some examples of contrast adjustment operations that this package facilitates.<table width=\"500\" border=\"0\" cellpadding=\"5\">\n\n<tr>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/contrast_stretching.gif\" width=\"100px\" alt=\"Contrast Stretching\" />\n<br />\nContrast Stretching\n</td>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/contrast_stretching_col.gif\" width=\"100px\" alt=\"Contrast Stretching\" />\n<br />\nContrast Stretching \n</td>\n\n</tr>\n\n<tr>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/linear_stretching.gif\" width=\"100px\" alt=\"Linear Stretching (Normalization)\" />\n<br />\nLinear Stretching and Normalization\n</td>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/linear_stretching_col.gif\" width=\"100px\" alt=\"Linear Stretching (Normalization)\" />\n<br />\nLinear Stretching and Normalization\n</td>\n\n</tr>\n\n<tr>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/gamma_correction.gif\" width=\"100px\" alt=\"Gamma Correction\" />\n<br />\nGamma Correction\n</td>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/gamma_correction_col.gif\" width=\"100px\" alt=\"Gamma Correction\" />\n<br />\nGamma Correction\n</td>\n\n</tr>\n\n<tr>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/equalization.gif\" width=\"100px\" alt=\"Histogram Equalization\" />\n<br />\nHistogram Equalization\n</td>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/equalization_col.gif\" width=\"100px\" alt=\"Histogram Equalization\" />\n<br />\nHistogram Equalization\n</td>\n\n</tr>\n\n<tr>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/matching.gif\" width=\"100px\" alt=\"Histogram Matching\" />\n<br />\nHistogram Matching\n</td>\n\n<td align=\"center\" valign=\"center\">\n<img src=\"../images/matching_col.gif\" width=\"100px\" alt=\"Histogram Matching\" />\n<br />\nHistogram Matching\n</td>\n\n</tr>\n\n</table>"
+},
+
+{
     "location": "#ImageContrastAdjustment.build_histogram",
     "page": "ImageContrastAdjustment.jl Documentation",
     "title": "ImageContrastAdjustment.build_histogram",
