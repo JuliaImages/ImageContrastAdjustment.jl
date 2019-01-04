@@ -61,7 +61,7 @@ n_j = \\sum_{n = 1}^{N}\\mathbf{1}_{(I_j)}(x_n),
  0 & \\text{otherwise},
 \\end{cases},
 ```
-represents the number of samples falling into the interval ``I_j``. An estimate
+represent the number of samples falling into the interval ``I_j``. An estimate
 for the probability mass of the ``j``th bin is given by the relative frequency
 ``\\hat{\\pi} = \\frac{n_j}{N}``, and the histogram estimator of the probability
 density function is defined as
@@ -87,7 +87,7 @@ below.
 
 ## Choices for `nbins`
 You can specify the number of discrete bins for the histogram. When specifying
-the number of bins consider the maximum number of greylevels that your image
+the number of bins consider the maximum number of graylevels that your image
 type supports. For example, with an image of type `N0f8` there is a maximum
 of 256 possible graylevels. Hence, if you request more than 256 bins for
 that type of image you should expect to obtain zero counts for numerous bins.
@@ -185,11 +185,11 @@ adjust_histogram(Equalization(),img, nbins)
 adjust_histogram(Equalization(),img, nbins; minval, maxval)
 ```
 
-Returns a histogram equalised image with a granularity of `nbins` number of bins.
+Returns a histogram equalized image with a granularity of `nbins` number of bins.
 
 # Details
 
-Histogram equalisation was initially conceived to  improve the contrast in a
+Histogram equalization was initially conceived to  improve the contrast in a
 single-channel grayscale image. The method transforms the
 distribution of the intensities in an image so that they are as uniform as
 possible [1]. The natural justification for uniformity
@@ -214,7 +214,7 @@ is defined by
 G_{i,j}(\\omega) = \\frac{\\omega_{ij}}{L-1},
 ```
 and each ``G_{i,j}`` is distributed according to some unknown density ``f_{G}``.
-While ``f_{G}`` is unknown, one can approximate it with a normalised histogram
+While ``f_{G}`` is unknown, one can approximate it with a normalized histogram
 of gray levels,
 
 ```math
@@ -225,7 +225,7 @@ where
 n_v = \\left | \\left\\{(i,j)\\, |\\,  G_{i,j}(\\omega)  = v \\right \\} \\right |
 ```
 represents the number of times a gray level with intensity ``v`` occurs in
-``\\mathbf{G}``. To transforming the distribution of the intensities so that
+``\\mathbf{G}``. To transform the distribution of the intensities so that
 they are as uniform as possible one needs to find a mapping ``T(\\cdot)`` such
 that ``T(G_{i,j}) \\thicksim U ``. The required mapping turns out to be the
 cumulative distribution function (CDF) of the empirical density
@@ -244,8 +244,8 @@ below.
 The `adjust_histogram(Equalization(),...)` function can handle a variety of
 input types.  The type of the returned image matches the input type.
 
-For coloured images, the input is converted to
-[YIQ](https://en.wikipedia.org/wiki/YIQ) type and the Y channel is equalised.
+For colored images, the input is converted to
+[YIQ](https://en.wikipedia.org/wiki/YIQ) type and the Y channel is equalized.
 This is the combined with the I and Q channels and the resulting image converted
 to the same type as the input.
 
@@ -255,8 +255,8 @@ You can specify the total number of bins in the histogram.
 
 ## Choices for `minval` and `maxval`
 
-If minval and maxval are specified then intensities are equalized to the range
-[minval, maxval]. The default values are 0 and 1.
+If `minval` and `maxval` are specified then intensities are equalized to the range
+[`minval`, `maxval`]. The default values are 0 and 1.
 
 # Example
 
@@ -369,7 +369,7 @@ respectively, and let
  S(x) = \\int_0^{x}p_{x}(w)\\mathrm{d} w \\quad \\text{and} \\quad
  T(z) = \\int_0^{z}p_{z}(w)\\mathrm{d} w
 ```
-represent their concomitant cumulative disitribution functions. Then the
+represent their concomitant cumulative distribution functions. Then the
 sought-after mapping ``Q(\\cdot)`` such that ``Q(x) \\thicksim p_{z} `` is given
 by
 
@@ -380,12 +380,12 @@ Q(x) =  T^{-1}\\left( S(x) \\right),
 where ``T^{-1}(y) = \\operatorname{min} \\{ x \\in \\mathbb{R} : y \\leq T(x)
 \\}`` is the inverse cumulative distribution function of ``T(x)``.
 
-The mapping suggests that one can conceptualise histogram matching as performing
-histogram equalisation on the source and target image and relating the two
-equalised histograms. Refer to [`adjust_histogram`](@ref
+The mapping suggests that one can conceptualize histogram matching as performing
+histogram equalization on the source and target image and relating the two
+equalized histograms. Refer to [`adjust_histogram`](@ref
 adjust_histogram(::Equalization, ::AbstractArray, ::Integer,
 ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) for more details on
-histogram equalisation.
+histogram equalization.
 
 # Options
 
@@ -405,7 +405,7 @@ channels and the resulting image converted to the same type as the input.
 ## Choices for `nbins`
 
 You can specify the total number of bins in the histogram. If you do not
-specify the number of bins then a default value of 256 bins is utilised.
+specify the number of bins then a default value of 256 bins is utilized.
 
 ## Choices for `edges`
 
@@ -589,7 +589,7 @@ below.
 The function can handle a variety of input types. The returned
 image depends on the input type.
 
-For coloured images, the input is converted to YIQ type and the Y channel is
+For colored images, the input is converted to YIQ type and the Y channel is
 gamma corrected. This is the combined with the I and Q channels and the
 resulting image converted to the same type as the input.
 
@@ -684,7 +684,7 @@ end
 adjust_histogram(LinearStretching(), img; minval = 0, maxval = 1)
 ```
 
-Returns an image where the range of the intensities spans the interval [minval, maxval].
+Returns an image where the range of the intensities spans the interval [`minval`, `maxval`].
 
 # Details
 
@@ -718,7 +718,7 @@ type as the input.
 ## Choices for `minval` and `maxval`
 
 If minval and maxval are specified then intensities are mapped to the range
-[minval, maxval]. The default values are 0 and 1.
+[`minval`, `maxval`]. The default values are 0 and 1.
 
 # Example
 
@@ -793,7 +793,7 @@ into a narrower band of light intensities.
 
 # Details
 
-Contrast stretching is a transformation that  enhances or reduces (for slope >
+Contrast stretching is a transformation that  enhances or reduces (for `slope` >
 1 or < 1, respectively) the contrast near saturation (0 and 1).
 It is given by the relation
 ```math
@@ -820,12 +820,12 @@ type as the input.
 ## Choice for `t`
 
 The value of `t` needs to be in the unit interval. If left unspecified a
-default value of 0.5 is utilised.
+default value of 0.5 is utilized.
 
 ## Choice for `slope`
 
 The value of `slope` can be any real number. If left unspecified a
-default value of 1.0 is utilised.
+default value of 1.0 is utilized.
 
 # Example
 
@@ -902,12 +902,12 @@ much as possible their previous grey level dynamics.
 The purpose of midway histogram equalization is to transform the intensities in
 a pair of images so that the intensities distribute according to a common
 "midway" distribution. The histogram representing the common distribution is
-chosen so that the original  grey level dynamics of the images are preserved as
+chosen so that the original  gray level dynamics of the images are preserved as
 much as possible. If one interprets histograms as piecewise-constant models of
 probability density functions (see [`build_histogram`](@ref
 build_histogram(::AbstractArray, ::Integer, ::Union{Real,AbstractGray},
-::Union{Real,AbstractGray}))), then the midway histogram equalisation task can
-be modelled as the problem of transforming one probability distribution into
+::Union{Real,AbstractGray}))), then the midway histogram equalization task can
+be modeled as the problem of transforming one probability distribution into
 another (see [`adjust_histogram`](@ref adjust_histogram(::Matching,::AbstractArray, ::AbstractArray, ::Integer))).
 It turns out that the solution to this transformation problem involves the
 cumulative and inverse cumulative distribution functions of the source and
@@ -919,7 +919,7 @@ and ``Z \\thicksim p_{z}``  represent an intensity in the first, second and
  S_{X_i}(x) = \\int_0^{x}p_{x_i}(w)\\mathrm{d} w \\; \\quad \\text{and} \\quad
  T_{Z}(x) = \\frac{2}{\\frac{1}{S_{X_1}(x)} + \\frac{1}{S_{X_2}(x)}}
 ```
-represent the cumulative disitribution functions of the two input images, and
+represent the cumulative distribution functions of the two input images, and
 their *harmonic mean*, respectively. Then the sought-after mapping
 ``Q_{X_i}(\\cdot)`` ``(i = 1,2)`` such that ``Q_{X_i}(x) \\thicksim p_{z} `` is
 given by
@@ -951,7 +951,7 @@ converted to the same type as the input.
 ## Choices for `nbins`
 
 You can specify the total number of bins in the histogram. If you do not
-specify the number of bins then a default value of 256 bins is utilised.
+specify the number of bins then a default value of 256 bins is utilized.
 
 ## Choices for `edges`
 

@@ -27,13 +27,13 @@ Contrast Stretching
 <td align="center" valign="center">
 <img src="images/linear_stretching.gif" width="100px" alt="Linear Stretching (Normalization)" />
 <br />
-Linear Stretching and Normalization
+Linear Stretching/Normalization
 </td>
 
 <td align="center" valign="center">
 <img src="images/linear_stretching_col.gif" width="100px" alt="Linear Stretching (Normalization)" />
 <br />
-Linear Stretching and Normalization
+Linear Stretching/Normalization
 </td>
 
 </tr>
