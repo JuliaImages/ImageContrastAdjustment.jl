@@ -131,13 +131,14 @@ edges, counts  = build_histogram(r, 256, minval = 0, maxval = 1)
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
-| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
-| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
-| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
-| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Equalization        	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Midway Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	| [`adjust_histogram!`](@ref adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	|
+| Histogram Matching            	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction              	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching             	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching           	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
 function build_histogram(img::AbstractArray, nbins::Integer = 256; minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
@@ -275,13 +276,14 @@ imshow(imgeq)
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
-| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
-| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
-| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
-| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction        	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Midway Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	| [`adjust_histogram!`](@ref adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	|
+| Histogram Matching            	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction              	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching             	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching           	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
 function adjust_histogram(operation::Equalization, img::AbstractArray, nbins::Integer = 256; minval::Union{Real,AbstractGray} = 0, maxval::Union{Real,AbstractGray} = 1)
@@ -434,14 +436,14 @@ imshow(img_transformed)
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
-| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
-| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
-| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
-| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
-
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction        	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization        	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Midway Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	| [`adjust_histogram!`](@ref adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	|
+| Gamma Correction              	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching             	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching           	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
 function adjust_histogram(operation::Matching, img::AbstractArray, targetimg::AbstractArray, nbins::Integer = 256)
@@ -620,15 +622,14 @@ imshow(imgadj)
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
-| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
-| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
-| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
-| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
-
-
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction        	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization        	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Midway Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	| [`adjust_histogram!`](@ref adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	|
+| Histogram Matching            	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Linear Stretching             	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching           	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
 function adjust_histogram(operation::GammaCorrection, img::AbstractArray, gamma::Real= 1.0)
@@ -738,14 +739,14 @@ imgo = adjust_histogram(LinearStretching(),img, minval = 0, maxval = 1)
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
-| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
-| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
-| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
-| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
-
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction        	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization        	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Midway Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	| [`adjust_histogram!`](@ref adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	|
+| Histogram Matching            	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction              	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Contrast Stretching           	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 """
 function adjust_histogram(operation::LinearStretching, img::AbstractArray; minval::Union{Real,AbstractGray} = 0.0, maxval::Union{Real,AbstractGray} = 1.0)
     adjust_histogram!(LinearStretching(), copy(img), minval = minval, maxval = maxval)
@@ -845,14 +846,14 @@ ret = adjust_histogram(ContrastStretching(),img, t = 0.6, slope = 3)
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
-| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
-| Histogram Matching     	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
-| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
-| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
-
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction        	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization        	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Midway Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	| [`adjust_histogram!`](@ref adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))                                  	|
+| Histogram Matching            	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction              	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching             	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
 """
 function adjust_histogram(operation::ContrastStretching, img::AbstractArray; t::Union{Real,AbstractGray} = 0.5, slope::Union{Real,AbstractGray} = 1.0)
     adjust_histogram!(ContrastStretching(), copy(img), t = t, slope = slope)
@@ -914,12 +915,12 @@ be modelled as the problem of transforming one probability distribution into
 another (see [`adjust_histogram`](@ref adjust_histogram(::Matching,::AbstractArray, ::AbstractArray, ::Integer))).
 It turns out that the solution to this transformation problem involves the
 cumulative and inverse cumulative distribution functions of the source and
-"midway" probability density functions. In particular, let the random variables ``X_i \\thicksim p_{x_i}``, ``(i = 1,2)``
+"midway" probability density functions. In particular, let the random variables ``X_i \\thicksim p_{x_i} \\; (i = 1,2)``,
 and ``Z \\thicksim p_{z}``  represent an intensity in the first, second and
 "midway" image respectively, and let
 
 ```math
- S_{X_i}(x) = \\int_0^{x}p_{x_i}(w)\\mathrm{d} w \\; (i = 1,2) \\quad \\text{and} \\quad
+ S_{X_i}(x) = \\int_0^{x}p_{x_i}(w)\\mathrm{d} w \\; \\quad \\text{and} \\quad
  T_{Z}(x) = \\frac{2}{\\frac{1}{S_{X_1}(x)} + \\frac{1}{S_{X_2}(x)}}
 ```
 represent the cumulative disitribution functions of the two input images, and
@@ -965,9 +966,18 @@ type.
 # Example
 
 ```julia
-using Images, TestImages, ImageView
+using Images, TestImages, ImageView, ImageContrastAdjustment
 
-TODO
+img = testimage("mandril_gray")
+
+# The same image but with different intensitiy distributions
+img1 = adjust_histogram(GammaCorrection(),img, 2)
+img2 = adjust_histogram(GammaCorrection(),img, 1.2)
+
+# Midway histogram equalization will transform these two images so that their
+# intensity distributions are almost identical.
+img1o, img2o = adjust_histogram(MidwayEqualization(),img1, img2, 256)
+
 ```
 
 # References
@@ -976,14 +986,14 @@ TODO
 
 # See also:
 
-| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
-|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
-| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
-| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
-| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
-| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
-
+| Operation                     	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|-------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction        	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization        	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Histogram Matching            	| [`adjust_histogram`](@ref adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	| [`adjust_histogram!`](@ref adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer))                                            	|
+| Gamma Correction              	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching             	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching           	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
 
 """
 function adjust_histogram(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, nbins::Integer = 256)
@@ -1043,7 +1053,7 @@ adjust_histogram!(MidwayEqualization(),img1, img2, nbins)
 adjust_histogram!(MidwayEqualization(),img1, img2, edges)
 ```
 
-Same as  [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))  except that it modifies the image that was passed as an argument.
+Same as  [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))  except that it modifies the images that were passed as arguments.
 """
 function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, nbins::Integer = 256 )
     edges, pdf1, pdf2 = construct_pdfs(img1, img2, nbins)
