@@ -73,6 +73,22 @@ Histogram Equalization
 <tr>
 
 <td align="center" valign="center">
+<img src="images/midway_equalization.gif" width="100px" alt="Midway Histogram Equalization" />
+<br />
+Midway Histogram Equalization
+</td>
+
+<td align="center" valign="center">
+<img src="images/midway_equalization_col.gif" width="100px" alt="Midway Histogram Equalization" />
+<br />
+Midway Histogram Equalization
+</td>
+
+</tr>
+
+<tr>
+
+<td align="center" valign="center">
 <img src="images/matching.gif" width="100px" alt="Histogram Matching" />
 <br />
 Histogram Matching
@@ -95,6 +111,8 @@ Histogram Matching
 build_histogram
 adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})
 adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})
+adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer)
+adjust_histogram!(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer)
 adjust_histogram(::Matching, ::AbstractArray, ::AbstractArray, ::Integer)
 adjust_histogram!(::Matching, ::AbstractArray, ::AbstractArray, ::Integer)
 adjust_histogram(::GammaCorrection, ::AbstractArray, ::Real)
