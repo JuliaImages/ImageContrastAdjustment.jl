@@ -23,6 +23,19 @@
         @test eltype(img) == eltype(ret)
 
         #=
+        Verify that the function can cope with a NaN value.
+        =#
+        if T <: Gray{Float32} || T <: Gray{Float64}
+            img[1] = NaN
+            ret = adjust_histogram(ContrastStretching(),img, t = 0.4, slope = 17)
+            edges, counts_after = build_histogram(ret,16, minval = 0, maxval = 1)
+            nonzero_after = sum(counts_after .!= 0)
+            @test nonzero_before < nonzero_after
+            @test nonzero_after == 16
+            @test eltype(img) == eltype(ret)
+        end
+
+        #=
         Verify that when the slope is set to a very large value the contrast
         streching behaves like a thresholding function.
         =#

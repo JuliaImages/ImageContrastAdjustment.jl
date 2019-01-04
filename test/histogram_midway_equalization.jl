@@ -20,6 +20,13 @@
         edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
         edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
         @test sum(cumsum(counts2) - cumsum(counts1)) == 0
+
+        edges, _ = build_histogram(img1, 256, minval = 0, maxval = 1)
+        img1o, img2o = adjust_histogram(MidwayEqualization(),img1, img2, edges)
+        edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
+        edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
+        @test sum(cumsum(counts2) - cumsum(counts1)) == 0
+
     end
 
     for T in (RGB{N0f8}, RGB{N0f16}, RGB{Float32}, RGB{Float64})
@@ -49,7 +56,13 @@
         # constructs new RGB images by combining the equalised Y channels with the IQ components.
         # The build_histogram function then implicitly converts the "midway" RGB images to Gray
         # in order to construct the histogram. After this process the cummulative distribution functions
-        # of these luminance gradients are no longer identical but still close.  
+        # of these luminance gradients are no longer identical but still close.
         @test abs(sum(cumsum(counts2) - cumsum(counts1))) <= 20
+
+        edges, _ = build_histogram(img1, 256, minval = 0, maxval = 1)
+        img1o, img2o = adjust_histogram(MidwayEqualization(),img1, img2, edges)
+        edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
+        edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
+        @test sum(cumsum(counts2) - cumsum(counts1)) == 0
     end
 end

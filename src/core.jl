@@ -42,17 +42,6 @@ function maxfinite(f, A::AbstractArray)
     ret
 end
 
-"""
-`m = maxabsfinite(A)` calculates the maximum absolute value in `A`, ignoring any values that are not finite (Inf or NaN).
-"""
-function maxabsfinite(A::AbstractArray{T}) where T
-    ret = sentinel_min(typeof(abs(A[1])))
-    for a in A
-        ret = maxfinite_scalar(abs(a), ret)
-    end
-    ret
-end
-
 minfinite_scalar(a::T, b::T) where {T} = isfinite(a) ? (b < a ? b : a) : b
 maxfinite_scalar(a::T, b::T) where {T} = isfinite(a) ? (b > a ? b : a) : b
 minfinite_scalar(a::T, b::T) where {T<:Union{Integer,FixedPoint}} = b < a ? b : a

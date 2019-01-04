@@ -15,4 +15,6 @@
         @test abs(dc) < 1e-6
         dc = ImageContrastAdjustment.maxfinite(img)-RGB{Float32}(maximum(A, dims=(2,3))...)
         @test abs(dc) < 1e-6
+        @test ImageContrastAdjustment.minfinite(x->x^2,[NaN,10,2]) == 4
+        @test ImageContrastAdjustment.maxfinite(x->x^2,[NaN,10,2]) == 100
 end

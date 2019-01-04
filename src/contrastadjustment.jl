@@ -57,7 +57,7 @@ n_j = \\sum_{n = 1}^{N}\\mathbf{1}_{(I_j)}(x_n),
 \\quad \\text{where} \\quad
 \\mathbf{1}_{(I_j)}(x) =
 \\begin{cases}
- 1 & \\text{if} x \\in I_j,\\\\
+ 1 & \\text{if} \\; x \\in I_j,\\\\
  0 & \\text{otherwise},
 \\end{cases},
 ```
@@ -674,11 +674,7 @@ function adjust_histogram!(operation::GammaCorrection, img::AbstractArray{Gray{T
     end
     # Map the pixels to their new grayvalues.
     map!(img,img) do p
-        if isnan(p)
-            return p
-        else
-            return  table[p.val.i + 1]
-        end
+        table[p.val.i + 1]
     end
 end
 
@@ -1006,9 +1002,9 @@ function adjust_histogram(operation::MidwayEqualization, img1::AbstractArray, im
 end
 
 
-function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}, img2::AbstractArray{T}, edges::AbstractRange ) where T <: Color3
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}, img2::AbstractArray{T}, edges::AbstractRange) where T <: Color3
     yiq1 = convert.(YIQ, img1)
-    yiq1_view = channelview(yiq)
+    yiq1_view = channelview(yiq1)
 
     yiq2 = convert.(YIQ, img2)
     yiq2_view = channelview(yiq2)
@@ -1018,7 +1014,7 @@ function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}
 end
 
 
-function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}, img2::AbstractArray{T}, nbins::Integer = 256 ) where T <: Color3
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}, img2::AbstractArray{T}, nbins::Integer = 256) where T <: Color3
     yiq1 = convert.(YIQ, img1)
     yiq1_view = channelview(yiq1)
 
@@ -1030,20 +1026,21 @@ function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}
 end
 
 
-function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, edges::AbstractRange )
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, edges::AbstractRange)
     edges, pdf1, pdf2 = construct_pdfs(img1, img2, edges)
+    midway_pdf = zero(pdf1)
     cdf1 = cumsum(pdf1)
     cdf2 = cumsum(pdf2)
     # midway_cdf is the harmonic mean between cdf1 and cdf2.
-    midway_cdf =  similar(cdf1)
-    for i in eachindex(cd1)
+    midway_cdf = similar(cdf1)
+    for i in eachindex(cdf1)
         if cdf1[i] == 0 || cdf2[i] == 0
             midway_cdf[i] = 0
         else
             midway_cdf[i] = 2 / (1/cdf1[i] + 1/cdf2[i])
         end
     end
-    midway_pdf =  cdf2pdf(midway_cdf)
+    cdf2pdf!(midway_pdf, midway_cdf)
     match_pdf!(Matching(), img1, edges, pdf1, midway_pdf),  match_pdf!(Matching(), img2, edges, pdf2, midway_pdf)
 end
 
@@ -1055,7 +1052,7 @@ adjust_histogram!(MidwayEqualization(),img1, img2, edges)
 
 Same as  [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))  except that it modifies the images that were passed as arguments.
 """
-function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, nbins::Integer = 256 )
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, nbins::Integer = 256)
     edges, pdf1, pdf2 = construct_pdfs(img1, img2, nbins)
     midway_pdf = zero(pdf1)
     cdf1 = cumsum(pdf1)
