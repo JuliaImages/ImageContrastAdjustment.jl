@@ -889,3 +889,183 @@ end
 function contrast_stretch(x, t, s, ϵ)
     return 1 / (1 + (t / (x+ϵ))^s)
 end
+
+
+"""
+```
+adjust_histogram(MidwayEqualization(),img1, img2, nbins)
+adjust_histogram(MidwayEqualization(),img1, img2, edges)
+```
+
+Gives a pair of images the same histogram whilst maintaining as
+much as possible their previous grey level dynamics.
+
+# Details
+
+The purpose of midway histogram equalization is to transform the intensities in
+a pair of images so that the intensities distribute according to a common
+"midway" distribution. The histogram representing the common distribution is
+chosen so that the original  grey level dynamics of the images are preserved as
+much as possible. If one interprets histograms as piecewise-constant models of
+probability density functions (see [`build_histogram`](@ref
+build_histogram(::AbstractArray, ::Integer, ::Union{Real,AbstractGray},
+::Union{Real,AbstractGray}))), then the midway histogram equalisation task can
+be modelled as the problem of transforming one probability distribution into
+another (see [`adjust_histogram`](@ref adjust_histogram(::Matching,::AbstractArray, ::AbstractArray, ::Integer))).
+It turns out that the solution to this transformation problem involves the
+cumulative and inverse cumulative distribution functions of the source and
+"midway" probability density functions. In particular, let the random variables ``X_i \\thicksim p_{x_i}``, ``(i = 1,2)``
+and ``Z \\thicksim p_{z}``  represent an intensity in the first, second and
+"midway" image respectively, and let
+
+```math
+ S_{X_i}(x) = \\int_0^{x}p_{x_i}(w)\\mathrm{d} w \\; (i = 1,2) \\quad \\text{and} \\quad
+ T_{Z}(x) = \\frac{2}{\\frac{1}{S_{X_1}(x)} + \\frac{1}{S_{X_2}(x)}}
+```
+represent the cumulative disitribution functions of the two input images, and
+their *harmonic mean*, respectively. Then the sought-after mapping
+``Q_{X_i}(\\cdot)`` ``(i = 1,2)`` such that ``Q_{X_i}(x) \\thicksim p_{z} `` is
+given by
+
+```math
+Q_{X_i}(x) =  T_{Z}^{-1}\\left( S_{X_i}(x) \\right),
+```
+
+where ``T_{Z}^{-1}(y) = \\operatorname{min} \\{ x \\in \\mathbb{R} : y \\leq
+T_{Z}(x) \\}`` is the inverse cumulative distribution function of ``T_{Z}(x)``.
+
+
+# Options
+
+Various options for the parameters of this function are described in more detail
+below.
+
+## Choices for `img1` and `img2`
+
+The  function can handle a variety of input
+types. The type of the returned image matches the input type.
+
+For colored images, the inputs are converted to
+[YIQ](https://en.wikipedia.org/wiki/YIQ)  type and the distributions of the Y
+channels are transformed according to a "midway" distribution. The modified Y
+channel is then combined with the I and Q channels and the resulting image
+converted to the same type as the input.
+
+## Choices for `nbins`
+
+You can specify the total number of bins in the histogram. If you do not
+specify the number of bins then a default value of 256 bins is utilised.
+
+## Choices for `edges`
+
+If you do not designate the number of bins, then you have the option to directly
+stipulate how the intervals will be divided by specifying a `AbstractRange`
+type.
+
+# Example
+
+```julia
+using Images, TestImages, ImageView
+
+TODO
+```
+
+# References
+1. T. Guillemot and J. Delon, “*Implementation of the Midway Image Equalization*,” Image Processing On Line, vol. 5, pp. 114–129, Jun. 2016. [doi:10.5201/ipol.2016.140](https://doi.org/10.5201/ipol.2016.140)
+
+
+# See also:
+
+| Operation              	| Function Name                                                                                                                                   	| In-place Variant                                                                                                                                  	|
+|------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| Histogram Construction 	| [`build_histogram`](@ref build_histogram(::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))                   	|                                                                                                                                                   	|
+| Histogram Equalization 	| [`adjust_histogram`](@ref adjust_histogram(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	| [`adjust_histogram!`](@ref adjust_histogram!(::Equalization, ::AbstractArray, ::Integer; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray})) 	|
+| Gamma Correction       	| [`adjust_histogram`](@ref adjust_histogram(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	| [`adjust_histogram!`](@ref adjust_histogram!(::GammaCorrection,  ::AbstractArray, ::Real))                                                        	|
+| Linear Stretching      	| [`adjust_histogram`](@ref adjust_histogram(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	| [`adjust_histogram!`](@ref adjust_histogram!(::LinearStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))       	|
+| Contrast Stretching    	| [`adjust_histogram`](@ref adjust_histogram(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	| [`adjust_histogram!`](@ref adjust_histogram!(::ContrastStretching,  ::AbstractArray; ::Union{Real,AbstractGray}, ::Union{Real,AbstractGray}))     	|
+
+
+"""
+function adjust_histogram(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, nbins::Integer = 256)
+    adjust_histogram!(MidwayEqualization(), copy(img1), copy(img2), nbins)
+end
+
+
+function adjust_histogram(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, edges::AbstractRange)
+    adjust_histogram!(MidwayEqualization(), copy(img1), copy(img2), edges)
+end
+
+
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}, img2::AbstractArray{T}, edges::AbstractRange ) where T <: Color3
+    yiq1 = convert.(YIQ, img1)
+    yiq1_view = channelview(yiq)
+
+    yiq2 = convert.(YIQ, img2)
+    yiq2_view = channelview(yiq2)
+
+    adjust_histogram!(MidwayEqualization(),view(yiq1_view,1,:,:), view(yiq2_view,1,:,:), edges)
+    convert.(T, yiq1), convert.(T, yiq2)
+end
+
+
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray{T}, img2::AbstractArray{T}, nbins::Integer = 256 ) where T <: Color3
+    yiq1 = convert.(YIQ, img1)
+    yiq1_view = channelview(yiq1)
+
+    yiq2 = convert.(YIQ, img2)
+    yiq2_view = channelview(yiq2)
+
+    adjust_histogram!(MidwayEqualization(),view(yiq1_view,1,:,:), view(yiq2_view,1,:,:), nbins)
+    convert.(T, yiq1), convert.(T, yiq2)
+end
+
+
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, edges::AbstractRange )
+    edges, pdf1, pdf2 = construct_pdfs(img1, img2, edges)
+    cdf1 = cumsum(pdf1)
+    cdf2 = cumsum(pdf2)
+    # midway_cdf is the harmonic mean between cdf1 and cdf2.
+    midway_cdf =  similar(cdf1)
+    for i in eachindex(cd1)
+        if cdf1[i] == 0 || cdf2[i] == 0
+            midway_cdf[i] = 0
+        else
+            midway_cdf[i] = 2 / (1/cdf1[i] + 1/cdf2[i])
+        end
+    end
+    midway_pdf =  cdf2pdf(midway_cdf)
+    match_pdf!(Matching(), img1, edges, pdf1, midway_pdf),  match_pdf!(Matching(), img2, edges, pdf2, midway_pdf)
+end
+
+"""
+```
+adjust_histogram!(MidwayEqualization(),img1, img2, nbins)
+adjust_histogram!(MidwayEqualization(),img1, img2, edges)
+```
+
+Same as  [`adjust_histogram`](@ref adjust_histogram(::MidwayEqualization, ::AbstractArray, ::AbstractArray, ::Integer))  except that it modifies the image that was passed as an argument.
+"""
+function adjust_histogram!(operation::MidwayEqualization, img1::AbstractArray, img2::AbstractArray, nbins::Integer = 256 )
+    edges, pdf1, pdf2 = construct_pdfs(img1, img2, nbins)
+    midway_pdf = zero(pdf1)
+    cdf1 = cumsum(pdf1)
+    cdf2 = cumsum(pdf2)
+    # midway_cdf is the harmonic mean between cdf1 and cdf2.
+    midway_cdf =  similar(cdf1)
+    for i in eachindex(cdf1)
+        if cdf1[i] == 0 || cdf2[i] == 0
+            midway_cdf[i] = 0
+        else
+            midway_cdf[i] = 2 / (1/cdf1[i] + 1/cdf2[i])
+        end
+    end
+    cdf2pdf!(midway_pdf, midway_cdf)
+    match_pdf!(Matching(), img1, edges, pdf1, midway_pdf),  match_pdf!(Matching(), img2, edges, pdf2, midway_pdf)
+end
+
+function cdf2pdf!(pdf::AbstractArray, cdf::AbstractArray)
+    pdf[1] = cdf[1]
+    for i = length(cdf)-1:-1:2
+        pdf[i] = cdf[i] - cdf[i-1]
+    end
+end
