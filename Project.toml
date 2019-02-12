@@ -1,5 +1,5 @@
 name = "ImageContrastAdjustment"
-uuid = "687214ca-09c0-11e9-3b00-113cfb2a62d1"
+uuid = "f332f351-ec65-5f6a-b3d1-319c6670881a"
 authors = ["Dr. Zygmunt L. Szpak <zygmunt.szpak@gmail.com>"]
 version = "0.1.1"
 
