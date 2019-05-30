@@ -6,17 +6,19 @@ version = "0.1.1"
 [deps]
 ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 ColorVectorSpace = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-DocumenterTools = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
-FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 
+[compat]
+ColorTypes = ">= 0.7.5"
+ColorVectorSpace = ">= 0.6"
+FixedPointNumbers = ">= 0.5"
+ImageCore = ">= 0.7"
 
 [extras]
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestImages = "5e47fb64-e119-507b-a336-dd2b206d9990"
 
 [targets]
