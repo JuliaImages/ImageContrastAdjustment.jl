@@ -14,6 +14,7 @@ ColorTypes = ">= 0.7.5"
 ColorVectorSpace = ">= 0.6"
 FixedPointNumbers = ">= 0.5"
 ImageCore = ">= 0.7"
+julia = "^1"
 
 [extras]
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
