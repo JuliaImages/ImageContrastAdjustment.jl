@@ -62,6 +62,12 @@ ret = adjust_histogram(img, ContrastStretching(t = 0.6, slope = 3))
 1. Gonzalez, R. C., Woods, R. E., & Eddins, S. L. (2004). *Digital image processing using MATLAB* (Vol. 624). Upper Saddle River, New Jersey: Pearson-Prentice-Hall.
 
 """
+Base.@kwdef struct ContrastStretching{T₁ <: Union{Real,AbstractGray},
+                                      T₂ <: Union{Real,AbstractGray}}  <: AbstractHistogramAdjustmentAlgorithm
+     t::T₁ = 0.5
+     slope::T₂ = 1.0
+end
+
 function (f::ContrastStretching)(out::GenericGrayImage, img::GenericGrayImage)
     T = eltype(out)
     ϵ = eps(T)

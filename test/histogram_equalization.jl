@@ -17,7 +17,7 @@
         and verify that all 32 bins have non-zero counts. This will confirm
         that the dynamic range of the original image has been increased.
         =#
-        imgeq = adjust_histogram(Equalization(),img, 256, minval = 0, maxval = 1)
+        imgeq = adjust_histogram(img, Equalization(nbins = 256, minval = 0, maxval = 1))
         edges, counts_after = build_histogram(imgeq, 32, minval = 0, maxval = 1)
         nonzero_after = sum(counts_after .!= 0)
         @test nonzero_before < nonzero_after
@@ -43,7 +43,7 @@
         verify that all 32 bins have non-zero counts. This will confirm that
         the dynamic range of the original image has been increased.
         =#
-        imgeq = adjust_histogram(Equalization(),img,256, minval = 0, maxval = 1)
+        imgeq = adjust_histogram(img,Equalization(nbins = 256, minval = 0, maxval = 1))
         edges, counts_after = build_histogram(imgeq, 32, minval = 0, maxval = 1)
         nonzero_after = sum(counts_after .!= 0)
         @test nonzero_before < nonzero_after
@@ -53,11 +53,11 @@
     # Verify that the minimum and maximum values of the equalised image match the
     # specified minimum and maximum values, i.e. that the intensities of the equalised
     # image are in the interval [minvalue, maxvalue].
-    imgeq = adjust_histogram(Equalization(),collect(0:1:255), 256, minval = 64, maxval = 128)
+    imgeq = adjust_histogram(collect(0:1:255), Equalization(nbins = 256, minval = 64, maxval = 128))
     @test all(imgeq[1:65] .== 64)
     @test all(imgeq[128+1:end] .== 128)
 
-    imgeq = adjust_histogram(Equalization(),collect(0:1/255:1), 256, minval = 64/255, maxval = 128/255)
+    imgeq = adjust_histogram(collect(0:1/255:1), Equalization(nbins = 256, minval = 64/255, maxval = 128/255))
     @test all(imgeq[1:65] .== 64/255)
     @test all(imgeq[128+1:end] .== 128/255)
 end

@@ -97,6 +97,14 @@ imshow(img_transformed)
 # References
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 """
+Base.@kwdef struct Matching{T₁ <: AbstractArray,
+                            T₂ <: Union{Integer, Nothing},
+                            T₃ <: Union{AbstractRange, Nothing}} <: AbstractHistogramAdjustmentAlgorithm
+    targetimg::T₁
+    nbins::T₂ = 256
+    edges::T₃ = nothing
+end
+
 function (f::Matching)(out::GenericGrayImage, img::GenericGrayImage)
     #TODO Throw error/warning if user specifies both edges and nbins simultaneously.
     out .= img

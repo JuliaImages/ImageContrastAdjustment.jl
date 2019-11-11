@@ -58,6 +58,12 @@ imgo = adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 
 """
+Base.@kwdef struct LinearStretching{T₁ <: Union{Real,AbstractGray},
+                                    T₂ <: Union{Real,AbstractGray}} <: AbstractHistogramAdjustmentAlgorithm
+    minval::T₁ = 0.0
+    maxval::T₂ = 1.0
+end
+
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     src_minval = minfinite(img)
     src_maxval = maxfinite(img)

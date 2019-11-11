@@ -9,7 +9,7 @@
         img = T.(collect(reshape(1/100:1/100:1, 10, 10)))
         minval = minimum(img)
         maxval = maximum(img)
-        ret =  adjust_histogram(LinearStretching(), img, minval = minval, maxval = maxval)
+        ret =  adjust_histogram(img, LinearStretching(minval = minval, maxval = maxval))
         if T <: Gray{Float32} || T <: Gray{Float64}
             @test all(map((i, r) -> isapprox(i, r), img, ret))
         else
@@ -19,7 +19,7 @@
         # Verify that NaN is also handled correctly.
         if T <: Gray{Float32} || T <: Gray{Float64}
             img[10] = NaN
-            ret = adjust_histogram(LinearStretching(), img, minval = minval, maxval = maxval )
+            ret = adjust_histogram(img, LinearStretching(minval = minval, maxval = maxval))
             @test isapprox(first(img), first(ret))
             @test isapprox(last(img), last(ret))
             @test isnan(ret[10])
@@ -29,7 +29,7 @@
         img = T.(collect(reshape(1/100:1/100:1, 10, 10)))
         minval = minimum(img)
         maxval = maximum(img)
-        ret =  adjust_histogram(LinearStretching(), img, minval = 0, maxval = 1)
+        ret =  adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
         @test isapprox(0, first(ret))
         @test isapprox(1, last(ret))
         @test isapprox(0, minimum(ret[.!isnan.(ret)]))
@@ -37,12 +37,12 @@
 
         # Verify that the return type matches the input type.
         img = T.(testimage("mandril_gray"))
-        ret = adjust_histogram(LinearStretching(), img, minval = 0, maxval = 1)
+        ret = adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
         @test eltype(ret) == eltype(img)
         @test isapprox(0, minimum(ret))
         @test isapprox(1, maximum(ret))
 
-        ret = adjust_histogram(LinearStretching(), img, minval = 0.2, maxval = 0.8)
+        ret = adjust_histogram(img, LinearStretching(minval = 0.2, maxval = 0.8))
         @test eltype(ret) == eltype(img)
         @test isapprox(0.2, minimum(ret))
         @test isapprox(0.8, maximum(ret))
@@ -65,7 +65,7 @@
         verify that all 32 bins have non-zero counts. This will confirm that
         the dynamic range of the original image has been increased.
         =#
-        ret = adjust_histogram(LinearStretching(),img, minval = 0, maxval = 1)
+        ret = adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
         edges, counts_after = build_histogram(ret, 32, minval = 0, maxval = 1)
         nonzero_after = sum(counts_after .!= 0)
         @test nonzero_before < nonzero_after

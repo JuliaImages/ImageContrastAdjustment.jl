@@ -96,6 +96,13 @@ imshow(imgeq)
 # References
 1. R. C. Gonzalez and R. E. Woods. *Digital Image Processing (3rd Edition)*.  Upper Saddle River, NJ, USA: Prentice-Hall,  2006.
 """
+Base.@kwdef struct Equalization{T₁ <: Union{Real,AbstractGray},
+                                T₂ <: Union{Real,AbstractGray}} <: AbstractHistogramAdjustmentAlgorithm
+    nbins::Int = 256
+    minval::T₁ = 0.0
+    maxval::T₂ = 1.0
+end
+
 function (f::Equalization)(out::GenericGrayImage, img::GenericGrayImage)
     edges, histogram = build_histogram(img, f.nbins, minval = f.minval, maxval = f.maxval)
     lb = first(axes(histogram,1))

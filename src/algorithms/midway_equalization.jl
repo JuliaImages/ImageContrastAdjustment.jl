@@ -96,6 +96,12 @@ img2o = last(img_sequence)
 # References
 1. T. Guillemot and J. Delon, “*Implementation of the Midway Image Equalization*,” Image Processing On Line, vol. 5, pp. 114–129, Jun. 2016. [doi:10.5201/ipol.2016.140](https://doi.org/10.5201/ipol.2016.140)
 """
+Base.@kwdef struct MidwayEqualization{T₁ <: Union{Integer, Nothing},
+                					  T₂ <: Union{AbstractRange, Nothing}} <: AbstractHistogramAdjustmentAlgorithm
+    nbins::T₁ = 256
+    edges::T₂ = nothing
+end
+
 function (f::MidwayEqualization)(out_sequence::Vector{<:GenericGrayImage}, in_sequence::Vector{<:GenericGrayImage})
     length(out_sequence) == 2 || error("Please supply a length-2 output vector to store the pair of images.")
     length(in_sequence) == 2 || error("Please supply a length-2 input vector storing the image pair.")

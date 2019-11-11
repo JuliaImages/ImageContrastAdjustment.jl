@@ -60,7 +60,7 @@ function adjust_histogram(::Type{T},
                   img,
                   f::AbstractHistogramAdjustmentAlgorithm,
                   args...; kwargs...) where T
-    out = Array{T}(undef, size(img))
+    out = similar(Array{T}, axes(img))
     adjust_histogram!(out, img, f, args...; kwargs...)
     return out
 end
@@ -98,7 +98,7 @@ function adjust_histogram(::Type{T},
                   f::AbstractHistogramAdjustmentAlgorithm,
                   args...; kwargs...) where T
     N  = length(img_sequence)
-    out_sequence = [Array{T}(undef, size(img_sequence[n])) for n = 1:N]
+    out_sequence = [similar(Array{T}, axes(img_sequence[n])) for n = 1:N]
     adjust_histogram!(out_sequence, img_sequence, f, args...; kwargs...)
     return out_sequence
 end

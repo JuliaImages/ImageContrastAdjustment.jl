@@ -16,13 +16,13 @@
                 img2[i,j] = i/255.0
             end
         end
-        img1o, img2o = adjust_histogram(MidwayEqualization(),img1, img2, 256)
+        img1o, img2o = adjust_histogram([img1, img2], MidwayEqualization(nbins = 256))
         edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
         edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
         @test sum(cumsum(counts2) - cumsum(counts1)) == 0
 
         edges, _ = build_histogram(img1, 256, minval = 0, maxval = 1)
-        img1o, img2o = adjust_histogram(MidwayEqualization(),img1, img2, edges)
+        img1o, img2o = adjust_histogram([img1, img2], MidwayEqualization(edges = edges))
         edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
         edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
         @test sum(cumsum(counts2) - cumsum(counts1)) == 0
@@ -48,7 +48,7 @@
         img2 = colorview(RGB,imgg2,imgg2,imgg2)
         img2 = T.(img2)
 
-        img1o, img2o = ImageContrastAdjustment.adjust_histogram(ImageContrastAdjustment.MidwayEqualization(), img1, img2, 256)
+        img1o, img2o = ImageContrastAdjustment.adjust_histogram([img1, img2], ImageContrastAdjustment.MidwayEqualization(nbins = 256))
 
         edges1, counts1 = ImageContrastAdjustment.build_histogram(img1o, 256, minval = 0, maxval = 1)
         edges2, counts2 = ImageContrastAdjustment.build_histogram(img2o, 256, minval = 0, maxval = 1)
@@ -60,7 +60,7 @@
         @test abs(sum(cumsum(counts2) - cumsum(counts1))) <= 20
 
         edges, _ = build_histogram(img1, 256, minval = 0, maxval = 1)
-        img1o, img2o = adjust_histogram(MidwayEqualization(),img1, img2, edges)
+        img1o, img2o = adjust_histogram([img1, img2], MidwayEqualization(edges = edges))
         edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
         edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
         @test sum(cumsum(counts2) - cumsum(counts1)) == 0
