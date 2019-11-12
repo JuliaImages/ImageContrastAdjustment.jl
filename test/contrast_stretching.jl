@@ -15,7 +15,7 @@
         verify that all 16 bins have non-zero counts. This will confirm that
         the dynamic range of the original image has been increased.
         =#
-        ret = adjust_histogram(ContrastStretching(),img, t = 0.4, slope = 17)
+        ret = adjust_histogram(img, ContrastStretching(t = 0.4, slope = 17))
         edges, counts_after = build_histogram(ret,16, minval = 0, maxval = 1)
         nonzero_after = sum(counts_after .!= 0)
         @test nonzero_before < nonzero_after
@@ -27,7 +27,7 @@
         =#
         if T <: Gray{Float32} || T <: Gray{Float64}
             img[1] = NaN
-            ret = adjust_histogram(ContrastStretching(),img, t = 0.4, slope = 17)
+            ret = adjust_histogram(img, ContrastStretching(t = 0.4, slope = 17))
             edges, counts_after = build_histogram(ret,16, minval = 0, maxval = 1)
             nonzero_after = sum(counts_after .!= 0)
             @test nonzero_before < nonzero_after
@@ -39,7 +39,7 @@
         Verify that when the slope is set to a very large value the contrast
         streching behaves like a thresholding function.
         =#
-        ret = adjust_histogram(ContrastStretching(), img, t = 0.37, slope = 1000)
+        ret = adjust_histogram(img, ContrastStretching(t = 0.37, slope = 1000))
         edges, counts_after = build_histogram(ret,16, minval = 0, maxval = 1)
         @test sum(counts_after .!= 0) == 2
     end
@@ -61,7 +61,7 @@
         verify that all 16 bins have non-zero counts. This will confirm that
         the dynamic range of the original image has been increased.
         =#
-        ret = adjust_histogram(ContrastStretching(),img, t = 0.4, slope = 17)
+        ret = adjust_histogram(img, ContrastStretching(t = 0.4, slope = 17))
         edges, counts_after = build_histogram(ret, 16, minval = 0, maxval = 1)
         nonzero_after = sum(counts_after .!= 0)
         @test nonzero_before < nonzero_after
@@ -72,7 +72,7 @@
         Verify that when the slope is set to a very large value the contrast
         streching behaves like a thresholding function.
         =#
-        ret = adjust_histogram(ContrastStretching(),img, t = 0.37, slope = 1000)
+        ret = adjust_histogram(img, ContrastStretching(t = 0.37, slope = 1000))
         edges, counts_after = build_histogram(ret, 16, minval = 0, maxval = 1)
         @test sum(counts_after .!= 0) == 2
     end
