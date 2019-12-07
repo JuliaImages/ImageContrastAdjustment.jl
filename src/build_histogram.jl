@@ -127,15 +127,11 @@ edges, counts  = build_histogram(r, 256, minval = 0, maxval = 1)
 # References
 [1] E. Herrholz, "Parsimonious Histograms," Ph.D. dissertation, Inst. of Math. and Comp. Sci., University of Greifswald, Greifswald, Germany, 2011.
 """
-function build_histogram(img::AbstractArray, nbins::Integer = 256; minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
+function build_histogram(img::AbstractArray, nbins::Integer = 256; 
+    minval::Union{Real,AbstractGray}=minfinite(img), 
+    maxval::Union{Real,AbstractGray}=maxfinite(img))
     edges = partition_interval(nbins, minval, maxval)
     build_histogram(img, edges)
-end
-
-# Warning is due to: https://github.com/JuliaLang/julia/issues/9498
-# Might resolve this based on this idea: https://discourse.julialang.org/t/fun-with-kwargs-methods/15711/8
-function build_histogram(img::AbstractArray, nbins::Integer = 256)
-    build_histogram(img, nbins, minval =  minfinite(img), maxval = maxfinite(img))
 end
 
 function build_histogram(img::AbstractArray{T}, edges::AbstractRange) where {T<:Color3}
