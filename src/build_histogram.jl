@@ -127,9 +127,9 @@ edges, counts  = build_histogram(r, 256, minval = 0, maxval = 1)
 # References
 [1] E. Herrholz, "Parsimonious Histograms," Ph.D. dissertation, Inst. of Math. and Comp. Sci., University of Greifswald, Greifswald, Germany, 2011.
 """
-function build_histogram(img::AbstractArray, nbins::Integer = 256; 
-    minval::Union{Real,AbstractGray}=minfinite(img), 
-    maxval::Union{Real,AbstractGray}=maxfinite(img))
+function build_histogram(img::AbstractArray, nbins::Integer = 256;
+                         minval::Union{Real,AbstractGray}=minfinite(img),
+                         maxval::Union{Real,AbstractGray}=maxfinite(img))
     edges = partition_interval(nbins, minval, maxval)
     build_histogram(img, edges)
 end
