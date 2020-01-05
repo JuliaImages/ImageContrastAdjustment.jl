@@ -1,6 +1,6 @@
 module ImageContrastAdjustment
 
-using ImageCore, ColorTypes, ColorVectorSpace, FixedPointNumbers
+using ImageCore, ColorVectorSpace
 using MappedArrays: of_eltype
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
