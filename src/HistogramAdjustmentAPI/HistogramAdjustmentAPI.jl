@@ -2,7 +2,8 @@
 # proposed in https://github.com/JuliaImages/ImagesAPI.jl/pull/3
 module HistogramAdjustmentAPI
 
-using ColorTypes
+using ImageCore # ColorTypes is sufficient
+
 # TODO Relax this to all image color types
 const GenericGrayImage = AbstractArray{<:Union{Number, AbstractGray}}
 

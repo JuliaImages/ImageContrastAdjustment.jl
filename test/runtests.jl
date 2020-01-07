@@ -1,5 +1,5 @@
 using ImageContrastAdjustment
-using Test, ImageCore, ColorTypes, FixedPointNumbers, ImageFiltering, TestImages
+using Test, ImageCore, ImageFiltering, TestImages
 
 @testset "ImageContrastAdjustment.jl" begin
     include("core.jl")
