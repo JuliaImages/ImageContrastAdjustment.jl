@@ -19,6 +19,11 @@ build_histogram
 ImageContrastAdjustment.HistogramAdjustmentAPI.AbstractHistogramAdjustmentAlgorithm
 ```
 
+### AdaptiveEqualization
+```@docs
+AdaptiveEqualization
+```
+
 ### ContrastStretching
 ```@docs
 ContrastStretching

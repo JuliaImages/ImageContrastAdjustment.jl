@@ -1,6 +1,8 @@
 module ImageContrastAdjustment
 
-using ImageCore, ColorVectorSpace
+using ColorVectorSpace
+using ImageCore
+using ImageTransformations: imresize
 using MappedArrays: of_eltype
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
@@ -14,6 +16,7 @@ const GenericGrayImage = AbstractArray{<:Union{Number, AbstractGray}}
 include("core.jl")
 include("build_histogram.jl")
 include("algorithms/common.jl")
+include("algorithms/adaptive_equalization.jl")
 include("algorithms/equalization.jl")
 include("algorithms/linear_stretching.jl")
 include("algorithms/contrast_stretching.jl")
@@ -23,6 +26,7 @@ include("algorithms/midway_equalization.jl")
 
 export
     # main types and functions
+    AdaptiveEqualization,
     Equalization,
     MidwayEqualization,
     Matching,
