@@ -1,7 +1,7 @@
 module ImageContrastAdjustment
 
 using ImageCore, ColorVectorSpace
-using MappedArrays: of_eltype
+using MappedArrays
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
 include("HistogramAdjustmentAPI/HistogramAdjustmentAPI.jl")

@@ -1,13 +1,32 @@
 function partition_interval(nbins::Integer, minval::Real, maxval::Real)
-    edges = (range(0,step=(maxval - minval) / nbins,length=nbins)) .+ minval
+    return range(minval, step=(maxval - minval) / nbins, length=nbins)
 end
 
 function partition_interval(nbins::Integer, minval::AbstractGray, maxval::AbstractGray)
-    partition_interval(nbins, minval.val, maxval.val)
+    return partition_interval(nbins, gray(minval), gray(maxval))
+end
+
+"""
+    edges, counts = rebin(edges0, counts0, nbins, minval, maxval)
+
+Re-bin a histogram (represented by `edges0` and `counts0`) to have `nbins` spanning
+`minval` to `maxval`.
+"""
+function rebin(edges0, counts0, nbins, minval, maxval)
+    edges = partition_interval(nbins, minval, maxval)
+    counts = fill(0, 0:nbins)
+    o = Base.Order.Forward
+    for (i, e) in enumerate(edges0)
+        index = searchsortedlast(edges, e, o)
+        counts[index] += counts0[i]
+    end
+    counts[0] += counts0[0]
+    return edges, counts
 end
 
 """
 ```
+edges, count = build_histogram(img)            # For 8-bit images only
 edges, count = build_histogram(img, nbins)
 edges, count = build_histogram(img, nbins; minval, maxval)
 edges, count = build_histogram(img, edges)
@@ -127,23 +146,50 @@ edges, counts  = build_histogram(r, 256, minval = 0, maxval = 1)
 # References
 [1] E. Herrholz, "Parsimonious Histograms," Ph.D. dissertation, Inst. of Math. and Comp. Sci., University of Greifswald, Greifswald, Germany, 2011.
 """
-function build_histogram(img::AbstractArray, nbins::Integer = 256;
+function build_histogram(img::GenericGrayImage, nbins::Integer = 256;
                          minval::Union{Real,AbstractGray}=minfinite(img),
                          maxval::Union{Real,AbstractGray}=maxfinite(img))
     edges = partition_interval(nbins, minval, maxval)
     build_histogram(img, edges)
 end
 
-function build_histogram(img::AbstractArray{T}, edges::AbstractRange) where {T<:Color3}
-    build_histogram(Gray.(img),edges)
+function build_histogram(img::AbstractArray{C}, nbins::Integer = 256; kwargs...) where C<:Color
+    build_histogram(mappedarray(Gray{eltype(C)}, img), nbins; kwargs...)
 end
 
-function build_histogram(img::AbstractArray, edges::AbstractRange)
+# Performance optimizations for build_histogram(img, nbins)
+
+function build_histogram(img::AbstractArray{T}) where T<:Union{N0f8, AbstractGray{N0f8}}
+    edges = range(N0f8(0), step=eps(N0f8), length=256)
+    counts = fill(0, 0:256)
+    @simd for v in img
+        @inbounds counts[reinterpret(gray(v))+1] += 1
+    end
+    return edges, counts
+end
+
+build_histogram(img::AbstractArray{C}) where C<:Color{N0f8} =
+    build_histogram(mappedarray(Gray{N0f8}, img))
+
+function build_histogram(img::AbstractArray{T}, nbins::Integer;
+                         minval::Union{Real,AbstractGray}=minfinite(img),
+                         maxval::Union{Real,AbstractGray}=maxfinite(img))  where T<:Union{N0f8, AbstractGray{N0f8}}
+    edgesraw, countsraw = build_histogram(img)
+    return rebin(edgesraw, countsraw, nbins, minval, maxval)
+end
+
+# build_histogram(img, edges)
+
+function build_histogram(img::AbstractArray{C}, edges::AbstractRange) where C<:Color
+    build_histogram(mappedarray(Gray{eltype(C)}, img), edges)
+end
+
+function build_histogram(img::GenericGrayImage, edges::AbstractRange)
     Base.has_offset_axes(edges) && throw(ArgumentError("edges must be indexed starting with 1"))
     lb = first(axes(edges,1))-1
     ub = last(axes(edges,1))
     first_edge = first(edges)
-    step_size = step(edges)
+    inv_step_size = 1/step(edges)
     counts = fill(0, lb:ub)
     for val in img
          if isnan(val)
@@ -155,7 +201,7 @@ function build_histogram(img::AbstractArray, edges::AbstractRange)
             elseif val < first(edges)
                 counts[lb] += 1
             else
-                index = Int(Base.div(val-first_edge,step_size)) + 1
+                index = floor(Int, (val-first_edge)*inv_step_size) + 1
                 counts[index] += 1
             end
         end
