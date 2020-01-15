@@ -17,13 +17,12 @@ the definitions of edges in each region of an image.
 # Details
 
 Histogram equalisation was initially conceived to  improve the contrast in a
-single-channel grayscale image. The method transforms the
-distribution of the intensities in an image so that they are as uniform as
-possible [1]. The natural justification for uniformity
-is that the image has better contrast  if the intensity levels of an image span
-a wide range on the intensity scale. As it turns out, the necessary
-transformation is a mapping based on the cumulative histogram---see [histeq](@ref)
-for more details.
+single-channel grayscale image. The method transforms the distribution of the
+intensities in an image so that they are as uniform as possible [1]. The natural
+justification for uniformity is that the image has better contrast  if the
+intensity levels of an image span a wide range on the intensity scale. As it
+turns out, the necessary transformation is a mapping based on the cumulative
+histogram---see [Equalization](@ref) for more details.
 
 A natural extension of histogram equalisation is to apply the contrast
 enhancement locally rather than globally [2]. Conceptually, one can imagine that
@@ -189,9 +188,8 @@ below.
 
 ## Choices for `img`
 
-The `clahe` function can handle a variety of input types. The returned image
-depends on the input type. If the input is an `Image` then the resulting image
-is of the same type and has the same properties.
+The function can handle a variety of input types. The returned image
+depends on the input type.
 
 For coloured images, the input is converted to
 [YIQ](https://en.wikipedia.org/wiki/YIQ) type and the Y channel is equalised.
@@ -242,16 +240,18 @@ imshow(imgeq)
 3. W. H. Press, S. A. Teukolsky, W. T. Vetterling, and B. P. Flannery.  *Numerical Recipes: The Art of Scientific Computing (3rd Edition)*. New York, NY, USA: Cambridge University Press, 2007.
 """
 Base.@kwdef struct AdaptiveEqualization{T₁ <: Union{Real,AbstractGray},
-                                        T₂ <: Union{Real,AbstractGray}} <: AbstractHistogramAdjustmentAlgorithm
+                                        T₂ <: Union{Real,AbstractGray},
+                                        T₃ <: Real} <: AbstractHistogramAdjustmentAlgorithm
     nbins::Int = 256
     minval::T₁ = 0.0
     maxval::T₂ = 1.0
     rblocks::Int = 8
     cblocks::Int = 8
-    clip::Float64 = 0.1
+    clip::T₃ = 0.1
 end
 
 function (f::AdaptiveEqualization)(out::GenericGrayImage, img::GenericGrayImage)
+    validate_parameters(f)
     height, width = length.(axes(img))
     # If necessary, resize the image so that the requested number of blocks fit exactly.
     resized_height = ceil(Int, height / (2 * f.rblocks)) * 2 * f.rblocks
@@ -300,13 +300,14 @@ function (f::AdaptiveEqualization)(out::GenericGrayImage, img::GenericGrayImage)
                      block_width, block_height, intensity_range,
                      f.cblocks, f.rblocks, block_cdf)
 
-    if must_resize
-        out = imresize(out_tmp, (height, width))
-    else
-        out = out_tmp
-    end
+    out .= must_resize ?  imresize(out_tmp, (height, width)) : out_tmp
+    return out
 end
 
+function validate_parameters(f::AdaptiveEqualization)
+    !(0 <= f.clip <= 1) && throw(ArgumentError("The parameter `clip` must be in the range [0..1]."))
+    !(1 <= f.rblocks && 1 <= f.cblocks) && throw(ArgumentError("The parameters `rblocks` and `cblocks` must be greater than 0."))
+end
 
 function (f::AdaptiveEqualization)(out::AbstractArray{<:Color3}, img::AbstractArray{<:Color3})
     T = eltype(img)
@@ -343,8 +344,8 @@ function determine_threshold(histogram::AbstractArray, clip_weight::Number)
     sorted_hist = sort(collect(histogram), rev = true)
     required_capacity = zeros(axes(sorted_hist))
     available_capacity = zeros(axes(sorted_hist))
-    # If we pick an empirical bin count as the actual limit, how many
-    # counts will we need to move (required_capacity) and how much space do
+    # If we pick an empirical bin count as the actual limit, determine how many
+    # counts we will need to move (required_capacity) and how much space do
     # we have in the bins (available_capacity).
     for i = 1:length(sorted_hist)
         required_capacity[i] = sum(sorted_hist[1:i] .- sorted_hist[i])
@@ -422,10 +423,10 @@ end
 
 function transform_image!(out, img, block_centroid_r, block_centroid_c, block_width, block_height, intensity_range, cblocks, rblocks, block_cdf)
     height, width = length.(axes(out))
-    r₀ = block_centroid_r[1] + 1
-    r₁ = block_centroid_r[end] - 1
-    c₀ = block_centroid_c[1] + 1
-    c₁ = block_centroid_c[end] - 1
+    r₀ = first(block_centroid_r) + 1
+    r₁ = last(block_centroid_r) - 1
+    c₀ = first(block_centroid_c) + 1
+    c₁ = last(block_centroid_c) - 1
     block_dimensions = (block_width, block_height)
 
     # Interior
@@ -434,22 +435,22 @@ function transform_image!(out, img, block_centroid_r, block_centroid_c, block_wi
     transform_interior!(out, img, bounds, block_centroids, block_dimensions,
                         intensity_range, block_cdf)
     # West
-    bounds = (r₀:r₁, 1:c₀)
+    bounds = (r₀:r₁, 1:(c₀-1))
     block_c_idx = 1
     transform_vertical_strip!(out, img, bounds, block_centroid_r, block_c_idx,
                               block_height, intensity_range, block_cdf)
     # East
-    bounds = (r₀:r₁, c₁:width)
+    bounds = (r₀:r₁, (c₁+1):width)
     block_c_idx = cblocks
     transform_vertical_strip!(out, img, bounds, block_centroid_r, block_c_idx,
                               block_height, intensity_range, block_cdf)
     # North
-    bounds = (1:r₀, c₀:c₁)
+    bounds = (1:r₀-1, c₀:c₁)
     block_r_idx = 1
     transform_horizontal_strip!(out, img, bounds, block_centroid_c, block_r_idx,
                                 block_width, intensity_range, block_cdf)
     # South
-    bounds = (r₁:height, c₀:c₁)
+    bounds = (r₁+1:height, c₀:c₁)
     block_r_idx = rblocks
     transform_horizontal_strip!(out, img, bounds, block_centroid_c, block_r_idx,
                                 block_width, intensity_range, block_cdf)

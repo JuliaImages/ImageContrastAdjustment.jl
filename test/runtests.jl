@@ -1,8 +1,9 @@
 using ImageContrastAdjustment
-using Test, ImageCore, ImageFiltering, TestImages
+using Test, ImageCore, ImageFiltering, TestImages, LinearAlgebra
 
 @testset "ImageContrastAdjustment.jl" begin
     include("core.jl")
+    include("adaptive_equalization.jl")
     include("histogram_construction.jl")
     include("histogram_matching.jl")
     include("histogram_equalization.jl")
