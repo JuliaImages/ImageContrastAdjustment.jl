@@ -1,22 +1,23 @@
-function transform_density!(img::AbstractArray, edges::AbstractArray, cdf::AbstractArray, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
+function transform_density!(img::AbstractArray,edges::AbstractArray, cdf::AbstractArray, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
     first_edge = first(edges)
-    step_size = step(edges)
-    T = eltype(img)
-    map!(img,img) do val
+    inv_step_size = 1/step(edges)
+    scale = (maxval - minval) / (cdf[end] - first(cdf))
+    function transform(val)
         if val >= edges[end]
             newval = cdf[end]
         elseif val < first_edge
             newval = first(cdf)
         else
-            index = Int(Base.div(val-first_edge,step_size)) + 1
+            index = floor(Int, (val-first_edge)*inv_step_size) + 1
             newval = cdf[index]
         end
         # Scale the new intensity value to so that it lies in the range [minval, maxval].
-        if T <: Integer
-            newval = ceil(minval + ((newval - first(cdf)) * (maxval - minval) / (cdf[end] - first(cdf))))
-        else
-            newval = minval + ((newval - first(cdf)) * (maxval - minval) / (cdf[end] - first(cdf)))
-        end
+        newval = minval + (newval - first(cdf)) * scale
+    end
+    if eltype(img) <: Integer
+        map!(val->ceil(transform(val)), img, img)
+    else
+        map!(transform, img, img)
     end
 end
 
