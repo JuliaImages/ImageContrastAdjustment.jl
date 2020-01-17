@@ -154,6 +154,22 @@ Histogram Equalization
 <tr>
 
 <td align="center" valign="center">
+<img src="images/adaptive_equalization.gif" width="100px" alt="Contrast Limited Adaptive Histogram Equalization" />
+<br />
+Contrast Limited Adaptive Histogram Equalization
+</td>
+
+<td align="center" valign="center">
+<img src="images/adaptive_equalization_col.gif" width="100px" alt="Contrast Limited Adaptive Histogram Equalization" />
+<br />
+Contrast Limited Adaptive Histogram Equalization
+</td>
+
+</tr>
+
+<tr>
+
+<td align="center" valign="center">
 <img src="images/midway_equalization.gif" width="100px" alt="Midway Histogram Equalization" />
 <br />
 Midway Histogram Equalization
