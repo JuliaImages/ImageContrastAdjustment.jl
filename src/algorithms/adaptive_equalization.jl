@@ -299,7 +299,6 @@ function (f::AdaptiveEqualization)(out::GenericGrayImage, img::GenericGrayImage)
     transform_image!(out_tmp, img_tmp, block_centroid_r, block_centroid_c,
                      block_width, block_height, intensity_range,
                      f.cblocks, f.rblocks, block_cdf)
-
     out .= must_resize ?  imresize(out_tmp, (height, width)) : out_tmp
     return out
 end
@@ -313,9 +312,22 @@ function (f::AdaptiveEqualization)(out::AbstractArray{<:Color3}, img::AbstractAr
     T = eltype(img)
     yiq = convert.(YIQ, img)
     yiq_view = channelview(yiq)
-    adjust_histogram!(view(yiq_view,1,:,:), f)
+    #=
+       TODO: Understand the cause and solution of this error.
+       When I pass a view I run into this error on Julia 1.1.
+       ERROR: ArgumentError: an array of type `Base.ReinterpretArray` shares memory with another argument and must
+       make a preventative copy of itself in order to maintain consistent semantics,
+       but `copy(A)` returns a new array of type `Array{Float64,3}`. To fix, implement:
+       `Base.unaliascopy(A::Base.ReinterpretArray)::typeof(A)`
+    =#
+    #adjust_histogram!(view(yiq_view,1,:,:), f)
+    y = comp1.(yiq)
+    adjust_histogram!(y, f)
+    yiq_view[1, :, :] .= y
     out .= convert.(T, yiq)
 end
+
+
 
 (f::AdaptiveEqualization)(out::GenericGrayImage, img::AbstractArray{<:Color3}) =
     f(out, of_eltype(Gray, img))
