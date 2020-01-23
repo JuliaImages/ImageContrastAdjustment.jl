@@ -96,7 +96,7 @@ imshow(imgeq)
 # References
 1. R. C. Gonzalez and R. E. Woods. *Digital Image Processing (3rd Edition)*.  Upper Saddle River, NJ, USA: Prentice-Hall,  2006.
 """
-Base.@kwdef struct Equalization{T₁ <: Union{Real,AbstractGray},
+@with_kw struct Equalization{T₁ <: Union{Real,AbstractGray},
                                 T₂ <: Union{Real,AbstractGray}} <: AbstractHistogramAdjustmentAlgorithm
     nbins::Int = 256
     minval::T₁ = 0.0

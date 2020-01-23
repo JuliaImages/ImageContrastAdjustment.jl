@@ -97,7 +97,7 @@ imshow(img_transformed)
 # References
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 """
-Base.@kwdef struct Matching{T₁ <: AbstractArray,
+@with_kw struct Matching{T₁ <: AbstractArray,
                             T₂ <: Union{Integer, Nothing},
                             T₃ <: Union{AbstractRange, Nothing}} <: AbstractHistogramAdjustmentAlgorithm
     targetimg::T₁
@@ -108,7 +108,8 @@ end
 function (f::Matching)(out::GenericGrayImage, img::GenericGrayImage)
     #TODO Throw error/warning if user specifies both edges and nbins simultaneously.
     out .= img
-    edges, pdf, target_pdf = isnothing(f.edges) ? construct_pdfs(out, f.targetimg, f.nbins) : construct_pdfs(out, f.targetimg, f.edges)
+    # @compat statement required to support `isnothing` for Julia verion 1.0
+    @compat edges, pdf, target_pdf = isnothing(f.edges) ? construct_pdfs(out, f.targetimg, f.nbins) : construct_pdfs(out, f.targetimg, f.edges)
     match_pdf!(out, edges, pdf, target_pdf)
     return out
 end
