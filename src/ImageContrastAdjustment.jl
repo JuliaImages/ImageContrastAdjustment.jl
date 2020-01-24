@@ -1,9 +1,11 @@
 module ImageContrastAdjustment
 
 using ColorVectorSpace
+using Compat: @compat, isnothing
 using ImageCore
 using ImageTransformations: imresize
 using MappedArrays
+using Parameters: @with_kw # Same as Base.@kwdef but works on Julia 1.0
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
 include("HistogramAdjustmentAPI/HistogramAdjustmentAPI.jl")

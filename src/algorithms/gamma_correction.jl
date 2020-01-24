@@ -75,7 +75,7 @@ imshow(imgadj)
 # References
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 """
-Base.@kwdef struct GammaCorrection{T <: Real} <: AbstractHistogramAdjustmentAlgorithm
+@with_kw struct GammaCorrection{T <: Real} <: AbstractHistogramAdjustmentAlgorithm
     gamma::T = 1.0
 end
 

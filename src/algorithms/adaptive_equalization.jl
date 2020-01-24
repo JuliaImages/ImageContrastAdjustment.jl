@@ -239,7 +239,7 @@ imshow(imgeq)
 2. S. M. Pizer, E. P. Amburn, J. D. Austin, R. Cromartie, A. Geselowitz, T. Greer, B. ter Haar Romeny, J. B. Zimmerman and K. Zuiderveld “Adaptive histogram equalization and its variations,” *Computer Vision, Graphics, and Image Processing*, vol. 38, no. 1, p. 99, Apr. 1987. [10.1016/S0734-189X(87)80186-X](https://doi.org/10.1016/s0734-189x(87)80156-1)
 3. W. H. Press, S. A. Teukolsky, W. T. Vetterling, and B. P. Flannery.  *Numerical Recipes: The Art of Scientific Computing (3rd Edition)*. New York, NY, USA: Cambridge University Press, 2007.
 """
-Base.@kwdef struct AdaptiveEqualization{T₁ <: Union{Real,AbstractGray},
+@with_kw struct AdaptiveEqualization{T₁ <: Union{Real,AbstractGray},
                                         T₂ <: Union{Real,AbstractGray},
                                         T₃ <: Real} <: AbstractHistogramAdjustmentAlgorithm
     nbins::Int = 256
