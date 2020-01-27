@@ -105,6 +105,14 @@ imshow(img_transformed)
     edges::T₃ = nothing
 end
 
+# Required for backwards compatibility with Images.jl. Will be removed once
+# code in deprecations.jl in the Images.jl package is removed.
+function Matching()
+     Base.depwarn("`Matching()` is deprecated, use Matching(targetimg = targetimg) instead.", :Matching)
+    return Matching(targetimg = zeros(3,3))
+end
+
+
 function (f::Matching)(out::GenericGrayImage, img::GenericGrayImage)
     #TODO Throw error/warning if user specifies both edges and nbins simultaneously.
     out .= img
