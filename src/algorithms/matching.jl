@@ -108,8 +108,7 @@ end
 function (f::Matching)(out::GenericGrayImage, img::GenericGrayImage)
     #TODO Throw error/warning if user specifies both edges and nbins simultaneously.
     out .= img
-    # @compat statement required to support `isnothing` for Julia verion 1.0
-    @compat edges, pdf, target_pdf = isnothing(f.edges) ? construct_pdfs(out, f.targetimg, f.nbins) : construct_pdfs(out, f.targetimg, f.edges)
+    edges, pdf, target_pdf = isnothing(f.edges) ? construct_pdfs(out, f.targetimg, f.nbins) : construct_pdfs(out, f.targetimg, f.edges)
     match_pdf!(out, edges, pdf, target_pdf)
     return out
 end

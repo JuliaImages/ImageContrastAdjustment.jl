@@ -1,7 +1,6 @@
 module ImageContrastAdjustment
 
 using ColorVectorSpace
-using Compat: @compat, isnothing
 using ImageCore
 using ImageTransformations: imresize
 using MappedArrays
@@ -25,6 +24,7 @@ include("algorithms/contrast_stretching.jl")
 include("algorithms/gamma_correction.jl")
 include("algorithms/matching.jl")
 include("algorithms/midway_equalization.jl")
+include("compat.jl")
 
 export
     # main types and functions

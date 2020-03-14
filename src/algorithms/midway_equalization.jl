@@ -111,8 +111,7 @@ function (f::MidwayEqualization)(out_sequence::Vector{<:GenericGrayImage}, in_se
     in2 = last(in_sequence)
     out1 .= in1
     out2 .= in2
-    # @compat statement required to support `isnothing` for Julia verion 1.0
-    @compat edges, pdf1, pdf2 = isnothing(f.edges) ? construct_pdfs(out1, out2, f.nbins) : construct_pdfs(out1, out2, f.edges)
+    edges, pdf1, pdf2 = isnothing(f.edges) ? construct_pdfs(out1, out2, f.nbins) : construct_pdfs(out1, out2, f.edges)
     midway_pdf = zero(pdf1)
     cdf1 = cumsum(pdf1)
     cdf2 = cumsum(pdf2)
