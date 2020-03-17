@@ -46,6 +46,13 @@
         @test eltype(ret) == eltype(img)
         @test isapprox(0.2, minimum(ret))
         @test isapprox(0.8, maximum(ret))
+
+        # Verify that results are correctly clamped to [0.2, 0.9] if it exceeds the range
+        alg = LinearStretching(src_minval=0.1, src_maxval=0.8, minval=0.2, maxval=0.9)
+        ret = adjust_histogram(img, alg)
+        @test eltype(ret) == eltype(img)
+        @test isapprox(T(0.2), minimum(ret))
+        @test isapprox(T(0.9), maximum(ret), atol=1e-2) #
     end
 
     for T in (RGB{N0f8}, RGB{N0f16}, RGB{Float32}, RGB{Float64})

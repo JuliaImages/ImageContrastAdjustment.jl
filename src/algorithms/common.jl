@@ -57,7 +57,3 @@ function cdf2pdf!(pdf::AbstractArray, cdf::AbstractArray)
         pdf[i] = cdf[i] - cdf[i-1]
     end
 end
-
-function linear_stretch(x, A, B, a, b)
-    return (x-A) * ((b-a)/(B-A)) + a
-end
