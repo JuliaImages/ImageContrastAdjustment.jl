@@ -1,7 +1,7 @@
 name = "ImageContrastAdjustment"
 uuid = "f332f351-ec65-5f6a-b3d1-319c6670881a"
 authors = ["Dr. Zygmunt L. Szpak <zygmunt.szpak@gmail.com>"]
-version = "0.3.4"
+version = "0.3.5"
 
 [deps]
 ColorVectorSpace = "c3611d14-8923-5661-9e6a-0046d554d3a4"
