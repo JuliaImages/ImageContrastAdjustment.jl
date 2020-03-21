@@ -64,14 +64,23 @@ imgo = adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 
 """
-@with_kw struct LinearStretching{T₁ <: Union{Real,AbstractGray},
-                                 T₂ <: Union{Real,AbstractGray},
-                                 T₃ <: Union{Nothing, Real,AbstractGray},
-                                 T₄ <: Union{Nothing, Real,AbstractGray}} <: AbstractHistogramAdjustmentAlgorithm
-    minval::T₁     = 0.0
-    maxval::T₂     = 1.0
-    src_minval::T₃ = nothing
-    src_maxval::T₄ = nothing
+@with_kw struct LinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm
+    minval::T     = 0.0f0
+    maxval::T     = 1.0f0
+    src_minval::T = nothing
+    src_maxval::T = nothing
+    function LinearStretching(minval::T1, maxval::T2, src_minval::T3, src_maxval::T4) where {
+                                                          T1 <: Union{Nothing,Real,AbstractGray},
+                                                          T2 <: Union{Nothing,Real,AbstractGray},
+                                                          T3 <: Union{Nothing,Real,AbstractGray},
+                                                          T4 <: Union{Nothing,Real,AbstractGray}}
+        minval <= maxval || throw(ArgumentError("minval $minval should be less than maxval $maxval"))
+        if !(isnothing(src_minval) || isnothing(src_maxval))
+            src_minval <= src_maxval || throw(ArgumentError("src_minval $src_minval should be less than src_maxval $src_maxval"))
+        end
+        T = promote_type(T1, T2, T3, T4)
+        new{T}(convert(T, minval), convert(T, maxval), convert(T, src_minval), convert(T, src_maxval))
+    end
 end
 
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
