@@ -128,8 +128,8 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     # the kernel operation `r * x - o` is equivalent to `(x-A) * ((b-a)/(B-A)) + a`
     # precalculate these and make inner loop contains only multiplication and addition
     # to get better performance
-    r = (dest_maxval - dest_minval) / (src_maxval - src_minval)
-    o = (src_minval*dest_maxval - src_maxval*dest_minval) / (src_maxval - src_minval)
+    r = convert(floattype(T), (dest_maxval - dest_minval) / (src_maxval - src_minval))
+    o = convert(floattype(T), (src_minval*dest_maxval - src_maxval*dest_minval) / (src_maxval - src_minval))
 
     if 1 ≈ r && 0 ≈ o
         # when image intensity is already adjusted, there's no need to do it again
