@@ -144,10 +144,9 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     out_maxval = r * img_max - o
     do_clamp = (out_minval < dest_minval) || (out_maxval > dest_maxval)
 
-    # early convert type to hit faster clamp version
-    #  -- this might not be the root reason but it gives performance difference locally
-    dest_minval = convert(typeof(out_minval), dest_minval)
-    dest_maxval = convert(typeof(out_maxval), dest_maxval)
+    # strip the colorant type to hit faster clamp version
+    dest_minval = convert(floattype(eltype(typeof(out_minval))), dest_minval)
+    dest_maxval = convert(floattype(eltype(typeof(out_maxval))), dest_maxval)
 
     # tweak the performance of FixedPoint by fusing operations into one broadcast
     # for Float32 the fallback implementation is faster
