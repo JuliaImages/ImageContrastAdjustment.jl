@@ -80,7 +80,7 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     src_maxval = isnothing(f.src_maxval) ? img_max : f.src_maxval
     T = eltype(out)
 
-    # r * x - o is equivalent to (x-A) * ((b-a)/(B-A)) + a
+    # the kernel operation `r * x - o` is equivalent to `(x-A) * ((b-a)/(B-A)) + a`
     # precalculate these and make inner loop contains only multiplication and addition
     # to get better performance
     r = (f.maxval - f.minval) / (src_maxval - src_minval)
@@ -89,7 +89,7 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     if 1 ≈ r && 0 ≈ o
         # when image intensity is already adjusted, there's no need to do it again
         # it's a trivial but common case in practice
-        out .= img
+        out === img || (out .= img)
         return out
     end
 
@@ -99,13 +99,27 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     out_maxval = r * img_max - o
     do_clamp = (out_minval < f.minval) || (out_maxval > f.maxval)
 
+    # early convert type to hit faster clamp version
+    #  -- this might not be the root reason but it gives performance difference locally
+    minval = convert(typeof(out_minval), f.minval)
+    maxval = convert(typeof(out_maxval), f.maxval)
+
+    # tweak the performance of FixedPoint by fusing operations into one broadcast
+    # for Float32 the fallback implementation is faster
+    if eltype(T) <: FixedPoint
+        # ?: is faster than if-else
+        @. out = do_clamp ? clamp(r * img - o, minval, maxval) : r * img - o
+        return out
+    end
+
+    # fallback implementation
     @inbounds @simd for p in eachindex(img)
         val = img[p]
         if isnan(val)
             out[p] = val
         else
             newval = r * val - o
-            do_clamp && (newval = clamp(newval, f.minval, f.maxval))
+            do_clamp && (newval = clamp(newval, minval, maxval))
             out[p] = T <: Integer ? round(Int, newval) : newval
         end
     end
