@@ -4,6 +4,10 @@
     LinearStretching <: AbstractHistogramAdjustmentAlgorithm
     LinearStretching(; minval = 0, maxval = 1, [src_minval], [src_maxval])
 
+    LinearStretching((src_minval, src_maxval) => (minval, maxval))
+    LinearStretching((src_minval, src_maxval))
+    LinearStretching(nothing => (minval, maxval))
+
     adjust_histogram([T,] img, f::LinearStretching)
     adjust_histogram!([out,] img, f::LinearStretching)
 ```
@@ -65,11 +69,11 @@ imgo = adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
 
 """
 @with_kw struct LinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm
-    minval::T     = 0.0f0
-    maxval::T     = 1.0f0
     src_minval::T = nothing
     src_maxval::T = nothing
-    function LinearStretching(minval::T1, maxval::T2, src_minval::T3, src_maxval::T4) where {
+    minval::T     = 0.0f0
+    maxval::T     = 1.0f0
+    function LinearStretching(src_minval::T1, src_maxval::T2, minval::T3, maxval::T4) where {
                                                           T1 <: Union{Nothing,Real,AbstractGray},
                                                           T2 <: Union{Nothing,Real,AbstractGray},
                                                           T3 <: Union{Nothing,Real,AbstractGray},
@@ -79,8 +83,17 @@ imgo = adjust_histogram(img, LinearStretching(minval = 0, maxval = 1))
             src_minval <= src_maxval || throw(ArgumentError("src_minval $src_minval should be less than src_maxval $src_maxval"))
         end
         T = promote_type(T1, T2, T3, T4)
-        new{T}(convert(T, minval), convert(T, maxval), convert(T, src_minval), convert(T, src_maxval))
+        new{T}(convert(T, src_minval), convert(T, src_maxval), convert(T, minval), convert(T, maxval))
     end
+end
+function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Tuple{T3, T4}}) where {T1, T2, T3, T4}
+    LinearStretching(rangemap.first..., rangemap.second...)
+end
+function LinearStretching(rangemap::Pair{Nothing, Tuple{T3, T4}}) where {T3, T4}
+    LinearStretching(nothing, nothing, rangemap.second...)
+end
+function LinearStretching(src_range::Tuple{T1, T2}) where {T1, T2}
+    LinearStretching(src_minval=src_range[1], src_maxval=src_range[2])
 end
 
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)

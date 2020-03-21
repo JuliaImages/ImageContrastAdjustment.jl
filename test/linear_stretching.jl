@@ -1,5 +1,14 @@
 @testset "Linear Stretching" begin
 
+    @test LinearStretching() === LinearStretching(nothing, nothing, 0.0f0, 1.0f0)
+    @test LinearStretching(src_minval=0.1f0, src_maxval=0.9f0, minval=0.0f0, maxval=1.0f0) ===
+          LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
+    @test LinearStretching((0.1f0, 0.9f0)=>(0.2f0, 0.8f0)) === LinearStretching(0.1f0, 0.9f0, 0.2f0, 0.8f0)
+    @test LinearStretching(nothing=>(0.2f0, 0.8f0)) === LinearStretching((nothing, nothing)=>(0.2f0, 0.8f0))
+    @test LinearStretching((0.1f0, 0.9f0)) === LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
+    @test_throws MethodError LinearStretching(0.1f0, 0.9f0)
+    @test_throws MethodError LinearStretching((0.1f0, 0.9f0), (0.0f0, 1.0f0))
+
     for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
         #=
         Stretching an image consisting of a linear ramp should not change the image
@@ -48,11 +57,10 @@
         @test isapprox(0.8, maximum(ret))
 
         # Verify that results are correctly clamped to [0.2, 0.9] if it exceeds the range
-        alg = LinearStretching(src_minval=0.1, src_maxval=0.8, minval=0.2, maxval=0.9)
-        ret = adjust_histogram(img, alg)
+        ret = adjust_histogram(img, LinearStretching((0.1, 0.8)=>(0.2, 0.9)))
         @test eltype(ret) == eltype(img)
         @test isapprox(T(0.2), minimum(ret))
-        @test isapprox(T(0.9), maximum(ret), atol=1e-2) #
+        @test isapprox(T(0.9), maximum(ret), atol=1e-2)
     end
 
     for T in (RGB{N0f8}, RGB{N0f16}, RGB{Float32}, RGB{Float64})
