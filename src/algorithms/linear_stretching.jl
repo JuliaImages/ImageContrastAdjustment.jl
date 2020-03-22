@@ -45,14 +45,14 @@ type as the input.
 
 ## Choices for `dst_minval` and `dst_maxval`
 
-If `dst_minval` and `dst_maxval` are specified then intensities are mapped to the range
-[`dst_minval`, `dst_maxval`]. The default values are 0 and 1.
+If destination value range `dst_minval` and `dst_maxval` are specified then intensities are
+mapped to the range [`dst_minval`, `dst_maxval`]. The default values are 0 and 1.
 
 ## Choices for `src_minval` and `src_maxval`
 
-`src_minval` and `src_maxval` specifies the intensity range of input image. By default,
-the values are `extrema(img)` (finite). If custom values are provided, the output
-intensity value will be clamped to range `(dst_minval, dst_maxval)` if it exceeds that.
+The source value range `src_minval` and `src_maxval` specifies the intensity range of input
+image. By default, the values are `extrema(img)` (finite). If custom values are provided,
+the output intensity value will be clamped to range `(dst_minval, dst_maxval)` if it exceeds that.
 
 # Example
 
@@ -60,8 +60,22 @@ intensity value will be clamped to range `(dst_minval, dst_maxval)` if it exceed
 using ImageContrastAdjustment, TestImages
 
 img = testimage("mandril_gray")
-imgo = adjust_histogram(img, LinearStretching(nothing=>(0, 1)))
+# Stretches the contrast in `img` so that it spans the unit interval.
+imgo = adjust_histogram(img, LinearStretching(dst_minval = 0, dst_maxval = 1))
+```
 
+Constructing a `LinearStretching` object using `Pair` is also supported
+
+```julia
+# these two constructors are equivalent
+LinearStretching(src_minval=0.1, src_maxval=0.9, dst_minval=0.05, dst_maxval=0.95)
+LinearStretching((0.1, 0.9)=>(0.05, 0.95))
+
+# replace the part with `nothing` to use default values, e.g.,
+# specify only destination value range
+LinearStretching(nothing=>(0.05, 0.95))
+# specify only source value range and use default destination value range, i.e., (0, 1)
+LinearStretching((0.1, 0.9)=>nothing)
 ```
 
 # References
@@ -113,8 +127,8 @@ end
 function LinearStretching(rangemap::Pair{Nothing, Tuple{T3, T4}}) where {T3, T4}
     LinearStretching(nothing, nothing, rangemap.second...)
 end
-function LinearStretching(src_range::Tuple{T1, T2}) where {T1, T2}
-    LinearStretching(src_minval=src_range[1], src_maxval=src_range[2])
+function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Nothing}) where {T1, T2}
+    LinearStretching(src_minval=rangemap.first[1], src_maxval=rangemap.first[2])
 end
 
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)

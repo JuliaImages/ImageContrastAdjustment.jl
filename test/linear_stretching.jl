@@ -5,7 +5,7 @@
           LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
     @test LinearStretching((0.1f0, 0.9f0)=>(0.2f0, 0.8f0)) === LinearStretching(0.1f0, 0.9f0, 0.2f0, 0.8f0)
     @test LinearStretching(nothing=>(0.2f0, 0.8f0)) === LinearStretching((nothing, nothing)=>(0.2f0, 0.8f0))
-    @test LinearStretching((0.1f0, 0.9f0)) === LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
+    @test LinearStretching((0.1f0, 0.9f0)=>nothing) === LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
     @test_throws MethodError LinearStretching(0.1f0, 0.9f0)
     @test_throws MethodError LinearStretching((0.1f0, 0.9f0), (0.0f0, 1.0f0))
 
