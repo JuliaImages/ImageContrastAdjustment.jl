@@ -161,6 +161,11 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     out_maxval = r * img_max - o
     do_clamp = (out_minval < dst_minval) || (out_maxval > dst_maxval)
 
+    # although slightly faster, clamp before linear stretching has some rounding issue, e.g,
+    # it's likely to get results like -9.313226f-10, which can't be directly converted to N0f8
+    # thus the line below is commented out and not used
+    # do_clamp && (img = clamp.(img, src_minval, src_maxval))
+
     # tweak the performance of FixedPoint by fusing operations into one broadcast
     # for Float32 the fallback implementation is faster
     if eltype(T) <: FixedPoint
@@ -170,13 +175,13 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     end
 
     # fallback implementation
-    do_clamp && (img = clamp.(img, src_minval, src_maxval))
     @inbounds @simd for p in eachindex(img)
         val = img[p]
         if isnan(val)
             out[p] = val
         else
             newval = r * val - o
+            do_clamp && (newval = clamp(newval, dst_minval, dst_maxval))
             out[p] = T <: Integer ? round(Int, newval) : newval
         end
     end
