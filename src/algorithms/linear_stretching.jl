@@ -5,7 +5,7 @@
     LinearStretching(; [src_minval], [src_maxval], dst_minval = 0, dst_maxval = 1)
 
     LinearStretching((src_minval, src_maxval) => (dst_minval, dst_maxval))
-    LinearStretching((src_minval, src_maxval))
+    LinearStretching((src_minval, src_maxval) => nothing)
     LinearStretching(nothing => (dst_minval, dst_maxval))
 
     adjust_histogram([T,] img, f::LinearStretching)
@@ -64,18 +64,18 @@ img = testimage("mandril_gray")
 imgo = adjust_histogram(img, LinearStretching(dst_minval = 0, dst_maxval = 1))
 ```
 
-Constructing a `LinearStretching` object using `Pair` is also supported
+For convenience, Constructing a `LinearStretching` object using `Pair` is also supported
 
 ```julia
 # these two constructors are equivalent
 LinearStretching(src_minval=0.1, src_maxval=0.9, dst_minval=0.05, dst_maxval=0.95)
-LinearStretching((0.1, 0.9)=>(0.05, 0.95))
+LinearStretching((0.1, 0.9) => (0.05, 0.95))
 
 # replace the part with `nothing` to use default values, e.g.,
 # specify only destination value range
-LinearStretching(nothing=>(0.05, 0.95))
+LinearStretching(nothing => (0.05, 0.95))
 # specify only source value range and use default destination value range, i.e., (0, 1)
-LinearStretching((0.1, 0.9)=>nothing)
+LinearStretching((0.1, 0.9) => nothing)
 ```
 
 # References
