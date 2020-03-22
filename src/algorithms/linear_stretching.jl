@@ -132,18 +132,21 @@ function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Nothing}) where {T1, T2}
 end
 
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
-    img_min, img_max = minfinite(img), maxfinite(img)
-    src_minval = isnothing(f.src_minval) ? img_min : f.src_minval
-    src_maxval = isnothing(f.src_maxval) ? img_max : f.src_maxval
-    dst_minval = f.dst_minval
-    dst_maxval = f.dst_maxval
     T = eltype(out)
+    FT = eltype(floattype(T))
+    img_min, img_max = minfinite(img), maxfinite(img)
+    # explicit annotation is needed because the ?: line mixes three value types:
+    # Nothing, T, and typeof(f.src_minval)
+    src_minval::FT = isnothing(f.src_minval) ? img_min : f.src_minval
+    src_maxval::FT = isnothing(f.src_maxval) ? img_max : f.src_maxval
+    dst_minval::FT = f.dst_minval
+    dst_maxval::FT = f.dst_maxval
 
     # the kernel operation `r * x - o` is equivalent to `(x-A) * ((b-a)/(B-A)) + a`
     # precalculate these and make inner loop contains only multiplication and addition
     # to get better performance
-    r = convert(floattype(T), (dst_maxval - dst_minval) / (src_maxval - src_minval))
-    o = convert(floattype(T), (src_minval*dst_maxval - src_maxval*dst_minval) / (src_maxval - src_minval))
+    r = (dst_maxval - dst_minval) / (src_maxval - src_minval)
+    o = (src_minval*dst_maxval - src_maxval*dst_minval) / (src_maxval - src_minval)
 
     if 1 ≈ r && 0 ≈ o
         # when image intensity is already adjusted, there's no need to do it again
@@ -158,10 +161,6 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     out_maxval = r * img_max - o
     do_clamp = (out_minval < dst_minval) || (out_maxval > dst_maxval)
 
-    # strip the colorant  to hit faster clamp version
-    dst_minval = convert(eltype(typeof(out_minval)), dst_minval)
-    dst_maxval = convert(eltype(typeof(out_maxval)), dst_maxval)
-
     # tweak the performance of FixedPoint by fusing operations into one broadcast
     # for Float32 the fallback implementation is faster
     if eltype(T) <: FixedPoint
@@ -171,13 +170,13 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     end
 
     # fallback implementation
+    do_clamp && (img = clamp.(img, src_minval, src_maxval))
     @inbounds @simd for p in eachindex(img)
         val = img[p]
         if isnan(val)
             out[p] = val
         else
             newval = r * val - o
-            do_clamp && (newval = clamp(newval, dst_minval, dst_maxval))
             out[p] = T <: Integer ? round(Int, newval) : newval
         end
     end
