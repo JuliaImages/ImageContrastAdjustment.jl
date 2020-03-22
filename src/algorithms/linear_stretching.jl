@@ -2,17 +2,17 @@
 """
 ```
     LinearStretching <: AbstractHistogramAdjustmentAlgorithm
-    LinearStretching(; [src_minval], [src_maxval], dest_minval = 0, dest_maxval = 1)
+    LinearStretching(; [src_minval], [src_maxval], dst_minval = 0, dst_maxval = 1)
 
-    LinearStretching((src_minval, src_maxval) => (dest_minval, dest_maxval))
+    LinearStretching((src_minval, src_maxval) => (dst_minval, dst_maxval))
     LinearStretching((src_minval, src_maxval))
-    LinearStretching(nothing => (dest_minval, dest_maxval))
+    LinearStretching(nothing => (dst_minval, dst_maxval))
 
     adjust_histogram([T,] img, f::LinearStretching)
     adjust_histogram!([out,] img, f::LinearStretching)
 ```
 
-Returns an image where the range of the intensities spans the interval [`dest_minval`, `dest_maxval`].
+Returns an image where the range of the intensities spans the interval [`dst_minval`, `dst_maxval`].
 
 # Details
 
@@ -43,16 +43,16 @@ channel are stretched to the specified range. The modified Y channel is then
 combined with the I and Q channels and the resulting image converted to the same
 type as the input.
 
-## Choices for `dest_minval` and `dest_maxval`
+## Choices for `dst_minval` and `dst_maxval`
 
-If dest_minval and dest_maxval are specified then intensities are mapped to the range
-[`dest_minval`, `dest_maxval`]. The default values are 0 and 1.
+If `dst_minval` and `dst_maxval` are specified then intensities are mapped to the range
+[`dst_minval`, `dst_maxval`]. The default values are 0 and 1.
 
 ## Choices for `src_minval` and `src_maxval`
 
 `src_minval` and `src_maxval` specifies the intensity range of input image. By default,
 the values are `extrema(img)` (finite). If custom values are provided, the output
-intensity value will be clamped to range `(dest_minval, dest_maxval)` if it exceeds that.
+intensity value will be clamped to range `(dst_minval, dst_maxval)` if it exceeds that.
 
 # Example
 
@@ -71,14 +71,14 @@ imgo = adjust_histogram(img, LinearStretching(nothing=>(0, 1)))
 @with_kw struct LinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm
     src_minval::T = nothing
     src_maxval::T = nothing
-    dest_minval::T = 0.0f0
-    dest_maxval::T = 1.0f0
+    dst_minval::T = 0.0f0
+    dst_maxval::T = 1.0f0
     minval::T = nothing
     maxval::T = nothing
     function LinearStretching(src_minval::T1,
                               src_maxval::T2,
-                              dest_minval::T3,
-                              dest_maxval::T4,
+                              dst_minval::T3,
+                              dst_maxval::T4,
                               minval::T5=nothing,
                               maxval::T6=nothing) where {T1 <: Union{Nothing,Real,AbstractGray},
                                                  T2 <: Union{Nothing,Real,AbstractGray},
@@ -89,22 +89,22 @@ imgo = adjust_histogram(img, LinearStretching(nothing=>(0, 1)))
         # in order to deprecate old fields we have to introduce new fields if we still want to use @with_kw
         # https://github.com/JuliaImages/ImageContrastAdjustment.jl/pull/28#discussion_r395751301
         if !isnothing(minval)
-            dest_minval = minval
-            Base.depwarn("deprecated: use `dest_minval` for keyword `minval`", :LinearStretching)
+            dst_minval = minval
+            Base.depwarn("deprecated: use `dst_minval` for keyword `minval`", :LinearStretching)
         end
         if !isnothing(maxval)
-            dest_maxval = maxval
-            Base.depwarn("deprecated: use `dest_maxval` for keyword `maxval`", :LinearStretching)
+            dst_maxval = maxval
+            Base.depwarn("deprecated: use `dst_maxval` for keyword `maxval`", :LinearStretching)
         end
 
-        dest_minval <= dest_maxval || throw(ArgumentError("dest_minval $dest_minval should be less than dest_maxval $dest_maxval"))
+        dst_minval <= dst_maxval || throw(ArgumentError("dst_minval $dst_minval should be less than dst_maxval $dst_maxval"))
         if !(isnothing(src_minval) || isnothing(src_maxval))
             src_minval <= src_maxval || throw(ArgumentError("src_minval $src_minval should be less than src_maxval $src_maxval"))
         end
         T = promote_type(T1, T2, T3, T4, T5, T6)
         new{T}(convert(T, src_minval), convert(T, src_maxval),
-               convert(T, dest_minval), convert(T, dest_maxval),
-               convert(T, dest_minval), convert(T, dest_maxval))
+               convert(T, dst_minval), convert(T, dst_maxval),
+               convert(T, dst_minval), convert(T, dst_maxval))
     end
 end
 function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Tuple{T3, T4}}) where {T1, T2, T3, T4}
@@ -121,15 +121,15 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     img_min, img_max = minfinite(img), maxfinite(img)
     src_minval = isnothing(f.src_minval) ? img_min : f.src_minval
     src_maxval = isnothing(f.src_maxval) ? img_max : f.src_maxval
-    dest_minval = f.dest_minval
-    dest_maxval = f.dest_maxval
+    dst_minval = f.dst_minval
+    dst_maxval = f.dst_maxval
     T = eltype(out)
 
     # the kernel operation `r * x - o` is equivalent to `(x-A) * ((b-a)/(B-A)) + a`
     # precalculate these and make inner loop contains only multiplication and addition
     # to get better performance
-    r = convert(floattype(T), (dest_maxval - dest_minval) / (src_maxval - src_minval))
-    o = convert(floattype(T), (src_minval*dest_maxval - src_maxval*dest_minval) / (src_maxval - src_minval))
+    r = convert(floattype(T), (dst_maxval - dst_minval) / (src_maxval - src_minval))
+    o = convert(floattype(T), (src_minval*dst_maxval - src_maxval*dst_minval) / (src_maxval - src_minval))
 
     if 1 ≈ r && 0 ≈ o
         # when image intensity is already adjusted, there's no need to do it again
@@ -142,17 +142,17 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     # this is only used when user specifies custom `(src_minval, src_maxval)`
     out_minval = r * img_min - o
     out_maxval = r * img_max - o
-    do_clamp = (out_minval < dest_minval) || (out_maxval > dest_maxval)
+    do_clamp = (out_minval < dst_minval) || (out_maxval > dst_maxval)
 
-    # strip the colorant type to hit faster clamp version
-    dest_minval = convert(floattype(eltype(typeof(out_minval))), dest_minval)
-    dest_maxval = convert(floattype(eltype(typeof(out_maxval))), dest_maxval)
+    # strip the colorant  to hit faster clamp version
+    dst_minval = convert(eltype(typeof(out_minval)), dst_minval)
+    dst_maxval = convert(eltype(typeof(out_maxval)), dst_maxval)
 
     # tweak the performance of FixedPoint by fusing operations into one broadcast
     # for Float32 the fallback implementation is faster
     if eltype(T) <: FixedPoint
         # ?: is faster than if-else
-        @. out = do_clamp ? clamp(r * img - o, dest_minval, dest_maxval) : r * img - o
+        @. out = do_clamp ? clamp(r * img - o, dst_minval, dst_maxval) : r * img - o
         return out
     end
 
@@ -163,7 +163,7 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
             out[p] = val
         else
             newval = r * val - o
-            do_clamp && (newval = clamp(newval, dest_minval, dest_maxval))
+            do_clamp && (newval = clamp(newval, dst_minval, dst_maxval))
             out[p] = T <: Integer ? round(Int, newval) : newval
         end
     end

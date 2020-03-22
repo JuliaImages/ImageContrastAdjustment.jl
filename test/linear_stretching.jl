@@ -1,7 +1,7 @@
 @testset "Linear Stretching" begin
 
     @test LinearStretching() === LinearStretching(nothing, nothing, 0.0f0, 1.0f0)
-    @test LinearStretching(src_minval=0.1f0, src_maxval=0.9f0, dest_minval=0.0f0, dest_maxval=1.0f0) ===
+    @test LinearStretching(src_minval=0.1f0, src_maxval=0.9f0, dst_minval=0.0f0, dst_maxval=1.0f0) ===
           LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
     @test LinearStretching((0.1f0, 0.9f0)=>(0.2f0, 0.8f0)) === LinearStretching(0.1f0, 0.9f0, 0.2f0, 0.8f0)
     @test LinearStretching(nothing=>(0.2f0, 0.8f0)) === LinearStretching((nothing, nothing)=>(0.2f0, 0.8f0))
@@ -90,8 +90,8 @@
 
     @testset "deprecations" begin
         @info "four depwarns are expected"
-        @test LinearStretching(minval = 0.1) === LinearStretching(dest_minval = 0.1)
-        @test LinearStretching(maxval = 0.9) === LinearStretching(dest_maxval = 0.9)
-        @test LinearStretching(minval = 0.1, maxval = 0.9) === LinearStretching(dest_minval = 0.1, dest_maxval = 0.9)
+        @test LinearStretching(minval = 0.1) === LinearStretching(dst_minval = 0.1)
+        @test LinearStretching(maxval = 0.9) === LinearStretching(dst_maxval = 0.9)
+        @test LinearStretching(minval = 0.1, maxval = 0.9) === LinearStretching(dst_minval = 0.1, dst_maxval = 0.9)
     end
 end
