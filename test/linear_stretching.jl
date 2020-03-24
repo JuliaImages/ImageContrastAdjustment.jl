@@ -1,13 +1,27 @@
 @testset "Linear Stretching" begin
 
-    @test LinearStretching() === LinearStretching(nothing, nothing, 0.0f0, 1.0f0)
-    @test LinearStretching(src_minval=0.1f0, src_maxval=0.9f0, dst_minval=0.0f0, dst_maxval=1.0f0) ===
-          LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
-    @test LinearStretching((0.1f0, 0.9f0)=>(0.2f0, 0.8f0)) === LinearStretching(0.1f0, 0.9f0, 0.2f0, 0.8f0)
-    @test LinearStretching(nothing=>(0.2f0, 0.8f0)) === LinearStretching((nothing, nothing)=>(0.2f0, 0.8f0))
-    @test LinearStretching((0.1f0, 0.9f0)=>nothing) === LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0)
-    @test_throws MethodError LinearStretching(0.1f0, 0.9f0)
-    @test_throws MethodError LinearStretching((0.1f0, 0.9f0), (0.0f0, 1.0f0))
+    @testset "constructors" begin
+        @test LinearStretching() === LinearStretching(nothing, nothing, 0.0f0, 1.0f0, nothing, nothing, false)
+        @test LinearStretching(src_minval=0.1f0, src_maxval=0.9f0, dst_minval=0.05f0, dst_maxval=0.95f0, no_clamp=true) ===
+              LinearStretching(0.1f0, 0.9f0, 0.05f0, 0.95f0, nothing, nothing, true)
+
+        @test LinearStretching((0.1f0, 0.9f0)=>(0.2f0, 0.8f0)) === LinearStretching(0.1f0, 0.9f0, 0.2f0, 0.8f0)
+        @test LinearStretching((0.1f0, 0.9f0)=>(0.2f0, 0.8f0), no_clamp=true) ===
+              LinearStretching(0.1f0, 0.9f0, 0.2f0, 0.8f0, nothing, nothing, true)
+
+        @test LinearStretching(nothing=>(0.2f0, 0.8f0)) === LinearStretching((nothing, nothing)=>(0.2f0, 0.8f0))
+        @test LinearStretching(nothing=>(0.2f0, 0.8f0), no_clamp=true) ===
+              LinearStretching((nothing, nothing)=>(0.2f0, 0.8f0), no_clamp=true)
+
+        @test LinearStretching((0.1f0, 0.9f0)=>nothing, no_clamp=true) ===
+              LinearStretching(0.1f0, 0.9f0, 0.0f0, 1.0f0, nothing, nothing, true)
+
+        @test_throws MethodError LinearStretching(0.1f0, 0.9f0)
+        @test_throws MethodError LinearStretching((0.1f0, 0.9f0), (0.0f0, 1.0f0))
+        @test_throws ArgumentError LinearStretching((0.9f0, 0.1f0)=>nothing)
+        @test_throws ArgumentError LinearStretching(nothing=>(0.9f0, 0.1f0))
+        @test_throws ArgumentError LinearStretching((0.9f0, 0.1f0)=>(0.9f0, 0.1f0))
+    end
 
     for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
         #=
@@ -62,6 +76,28 @@
         @test isapprox(T(0.2), minimum(ret))
         @test isapprox(T(0.9), maximum(ret), atol=1e-2)
     end
+
+    # Verify that no_clamp option handles different input types correctly without ArgumentError
+    img = Float32.(testimage("mandril_gray"))
+    ret_clamp = adjust_histogram(img, LinearStretching((0.3, 0.8)=>(0.1, 1.1), no_clamp=true))
+    @test eltype(ret_clamp) == eltype(img)
+    @test isapprox(-0.5f0, minimum(ret_clamp))
+    @test isapprox(1.272549f0, maximum(ret_clamp))
+    ret_noclamp = adjust_histogram(img, LinearStretching((0.3, 0.8)=>(0.1, 1.1), no_clamp=false))
+    @test eltype(ret_noclamp) == eltype(img)
+    @test isapprox(0.1f0, minimum(ret_noclamp))
+    @test isapprox(1.1f0, maximum(ret_noclamp))
+    # when no_clamp==true, the output is still clamped by (typemin(T), typemax(T))
+    img = N0f8.(testimage("mandril_gray"))
+    ret_clamp = adjust_histogram(img, LinearStretching((0.3, 0.8)=>(0.1, 1.1), no_clamp=true))
+    @test eltype(ret_clamp) == eltype(img)
+    @test isapprox(0.0N0f8, minimum(ret_clamp))
+    @test isapprox(1.0N0f8, maximum(ret_clamp))
+    ret_noclamp = adjust_histogram(img, LinearStretching((0.3, 0.8)=>(0.1, 1.1), no_clamp=false))
+    @test eltype(ret_noclamp) == eltype(img)
+    @test isapprox(0.1N0f8, minimum(ret_noclamp))
+    @test isapprox(1.0N0f8, maximum(ret_noclamp))
+    @test ret_clamp != ret_noclamp
 
     for T in (RGB{N0f8}, RGB{N0f16}, RGB{Float32}, RGB{Float64})
         #=

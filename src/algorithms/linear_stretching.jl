@@ -2,7 +2,9 @@
 """
 ```
     LinearStretching <: AbstractHistogramAdjustmentAlgorithm
-    LinearStretching(; [src_minval], [src_maxval], dst_minval = 0, dst_maxval = 1)
+    LinearStretching(; [src_minval], [src_maxval],
+                       dst_minval=0, dst_maxval=1,
+                       no_clamp=false)
 
     LinearStretching((src_minval, src_maxval) => (dst_minval, dst_maxval))
     LinearStretching((src_minval, src_maxval) => nothing)
@@ -52,7 +54,14 @@ mapped to the range [`dst_minval`, `dst_maxval`]. The default values are 0 and 1
 
 The source value range `src_minval` and `src_maxval` specifies the intensity range of input
 image. By default, the values are `extrema(img)` (finite). If custom values are provided,
-the output intensity value will be clamped to range `(dst_minval, dst_maxval)` if it exceeds that.
+the output intensity value will be clamped to range `[dst_minval, dst_maxval]` if it exceeds that.
+
+## `no_clamp`
+
+Setting `no_clamp=true` to disable the automatic clamp even if the output intensity value
+exceeds the range `[dst_minval, dst_maxval]`. Note that a clamp is still applied for types
+that has limited value range, for example, if the input eltype is `N0f8`, then the output will
+be clamped to `[0.0N0f8, 1.0N0f8]` even if `no_clamp==true`.
 
 # Example
 
@@ -89,12 +98,14 @@ LinearStretching((0.1, 0.9) => nothing)
     dst_maxval::T = 1.0f0
     minval::T = nothing
     maxval::T = nothing
+    no_clamp::Bool = false
     function LinearStretching(src_minval::T1,
                               src_maxval::T2,
                               dst_minval::T3,
                               dst_maxval::T4,
                               minval::T5=nothing,
-                              maxval::T6=nothing) where {T1 <: Union{Nothing,Real,AbstractGray},
+                              maxval::T6=nothing,
+                              no_clamp::Bool=false) where {T1 <: Union{Nothing,Real,AbstractGray},
                                                  T2 <: Union{Nothing,Real,AbstractGray},
                                                  T3 <: Union{Nothing,Real,AbstractGray},
                                                  T4 <: Union{Nothing,Real,AbstractGray},
@@ -118,17 +129,18 @@ LinearStretching((0.1, 0.9) => nothing)
         T = promote_type(T1, T2, T3, T4, T5, T6)
         new{T}(convert(T, src_minval), convert(T, src_maxval),
                convert(T, dst_minval), convert(T, dst_maxval),
-               convert(T, dst_minval), convert(T, dst_maxval))
+               convert(T, dst_minval), convert(T, dst_maxval),
+               no_clamp)
     end
 end
-function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Tuple{T3, T4}}) where {T1, T2, T3, T4}
-    LinearStretching(rangemap.first..., rangemap.second...)
+function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Tuple{T3, T4}}; no_clamp=false) where {T1, T2, T3, T4}
+    LinearStretching(rangemap.first..., rangemap.second..., nothing, nothing, no_clamp)
 end
-function LinearStretching(rangemap::Pair{Nothing, Tuple{T3, T4}}) where {T3, T4}
-    LinearStretching(nothing, nothing, rangemap.second...)
+function LinearStretching(rangemap::Pair{Nothing, Tuple{T3, T4}}; no_clamp=false) where {T3, T4}
+    LinearStretching(nothing, nothing, rangemap.second..., nothing, nothing, no_clamp)
 end
-function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Nothing}) where {T1, T2}
-    LinearStretching(src_minval=rangemap.first[1], src_maxval=rangemap.first[2])
+function LinearStretching(rangemap::Pair{Tuple{T1, T2}, Nothing}; no_clamp=false) where {T1, T2}
+    LinearStretching(src_minval=rangemap.first[1], src_maxval=rangemap.first[2], no_clamp=no_clamp)
 end
 
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
@@ -156,10 +168,20 @@ function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     end
 
     # In most cases, we don't need to clamp the output
-    # this is only used when user specifies custom `(src_minval, src_maxval)`
+    # this is only used when user specifies custom parameters
     out_minval = r * img_min - o
     out_maxval = r * img_max - o
-    do_clamp = (out_minval < dst_minval) || (out_maxval > dst_maxval)
+    do_clamp = f.no_clamp ? false : (out_minval < dst_minval) || (out_maxval > dst_maxval)
+    # re-adjust clamp option to avoid ArgumentError
+    if !do_clamp && (out_minval < typemin(T) || out_maxval > typemax(T))
+        do_clamp = true
+        dst_minval = convert(typeof(dst_minval), typemin(eltype(T)))
+        dst_maxval = convert(typeof(dst_maxval), typemax(eltype(T)))
+    else
+        do_clamp = do_clamp || out_minval < typemin(T) || out_maxval > typemax(T)
+        dst_minval = max(dst_minval, convert(typeof(dst_minval), typemin(eltype(T))))
+        dst_maxval = min(dst_maxval, convert(typeof(dst_maxval), typemax(eltype(T))))
+    end
 
     # although slightly faster, clamp before linear stretching has some rounding issue, e.g,
     # it's likely to get results like -9.313226f-10, which can't be directly converted to N0f8
