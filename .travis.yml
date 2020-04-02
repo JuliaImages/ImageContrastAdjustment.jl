@@ -8,10 +8,7 @@ julia:
   - 1.0
   - 1
   - nightly
-matrix:
-  allow_failures:
-    - julia: nightly
-  fast_finish: true
+
 notifications:
   email: false
 after_success:
@@ -27,3 +24,8 @@ jobs:
                                                Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
       after_success: skip
+  
+  allow_failures:
+  - julia: nightly
+
+  fast_finish: true
