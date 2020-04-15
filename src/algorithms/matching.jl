@@ -83,7 +83,7 @@ type.
 using Images, TestImages, ImageView
 
 img_source = testimage("mandril_gray")
-img_target = adjust_gamma(img_source, 1/2)
+img_target = adjust_histogram(img_source, GammaCorrection(gamma = 0.5))
 img_transformed = adjust_histogram(img_source, Matching(targetimg = img_target))
 #=
     A visual inspection confirms that img_transformed resembles img_target
