@@ -1,11 +1,13 @@
 name: Run benchmarks
 
 on:
-  pull_request:
+  label:
+    types: [created, edited]
 
 jobs:
   Benchmark:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'label' && github.event.label.name == 'run benchmark' }}
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@latest
