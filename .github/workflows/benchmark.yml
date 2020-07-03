@@ -1,16 +1,27 @@
 name: Run benchmarks
 
 on:
-  pull_request:
+  label:
+    types: [created, edited]
 
 jobs:
   Benchmark:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'label' && github.event.label.name == 'run benchmark' }}
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@latest
+      - name: Cache artifacts
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-artifacts
         with:
-          version: 1.3
+          path: ~/.julia/artifacts 
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
       - name: Install dependencies
         run: julia -e 'using Pkg; pkg"add JSON PkgBenchmark BenchmarkCI@0.1"'
       - name: Run benchmarks
