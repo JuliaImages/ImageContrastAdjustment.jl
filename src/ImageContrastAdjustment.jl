@@ -3,7 +3,8 @@ module ImageContrastAdjustment
 using ColorVectorSpace
 using ImageCore
 using ImageTransformations: imresize
-using MappedArrays
+# Where possible we avoid a direct dependency to reduce the number of [compat] bounds
+using ImageCore.MappedArrays
 using Parameters: @with_kw # Same as Base.@kwdef but works on Julia 1.0
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
