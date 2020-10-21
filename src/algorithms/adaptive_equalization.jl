@@ -228,7 +228,7 @@ If `minval` and `maxval` are specified then intensities are equalized to the ran
 using TestImages, FileIO, ImageView
 
 img =  testimage("mandril_gray")
-imgeq = adjust_histogram(img, AdativeEqualization(nbins = 256, rblocks = 4, cblocks = 4, clip = 0.2))
+imgeq = adjust_histogram(img, AdaptiveEqualization(nbins = 256, rblocks = 4, cblocks = 4, clip = 0.2))
 
 imshow(img)
 imshow(imgeq)
