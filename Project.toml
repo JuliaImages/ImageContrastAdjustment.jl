@@ -10,7 +10,7 @@ ImageTransformations = "02fcd773-0e25-5acc-982a-7f6622650795"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 
 [compat]
-ColorVectorSpace = "0.6, 0.7, 0.8"
+ColorVectorSpace = "0.6, 0.7, 0.8, 0.9"
 ImageCore = "0.8.5"
 ImageTransformations = "0.8.1"
 Parameters = "0.12"
