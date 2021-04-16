@@ -418,6 +418,8 @@ end
 
 
 function apply_cdf_transform(val::Union{Real,AbstractGray}, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray}, edges::AbstractArray, cdf::AbstractArray)
+    val, minval, maxval = gray(val), gray(minval), gray(maxval)
+
     first_edge = first(edges)
     inv_step_size = 1 / step(edges)
     scale = (maxval - minval) / (cdf[end] - first(cdf))

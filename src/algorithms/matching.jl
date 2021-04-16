@@ -132,7 +132,7 @@ end
     f(out, of_eltype(Gray, img))
 
 
-function match_pdf!(img::AbstractArray, edges::AbstractArray, pdf::AbstractArray, target_pdf::AbstractArray)
+function match_pdf!(img::GenericGrayImage, edges::AbstractArray, pdf::AbstractArray, target_pdf::AbstractArray)
     cdf = parent(cumsum(pdf))
     target_cdf = parent(cumsum(target_pdf))
     # Precompute the inverse cummulative distribution function of target_cdf.
@@ -144,6 +144,7 @@ function match_pdf!(img::AbstractArray, edges::AbstractArray, pdf::AbstractArray
     first_edge = first(edges)
     last_edge = last(edges)
     map!(img, img) do val
+        val = gray(val)
         if isnan(val)
             return val
         else
