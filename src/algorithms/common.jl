@@ -1,8 +1,9 @@
-function transform_density!(img::AbstractArray,edges::AbstractArray, cdf::AbstractArray, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
+function transform_density!(img::GenericGrayImage, edges::AbstractArray, cdf::AbstractArray, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
     first_edge = first(edges)
     inv_step_size = 1/step(edges)
     scale = (maxval - minval) / (cdf[end] - first(cdf))
     function transform(val)
+        val = gray(val)
         if val >= edges[end]
             newval = cdf[end]
         elseif val < first_edge
@@ -21,13 +22,13 @@ function transform_density!(img::AbstractArray,edges::AbstractArray, cdf::Abstra
     end
 end
 
-function construct_pdfs(img::AbstractArray, targetimg::AbstractArray, edges::AbstractRange)
+function construct_pdfs(img::GenericGrayImage, targetimg::AbstractArray, edges::AbstractRange)
     _, histogram = build_histogram(img, edges)
     _, target_histogram = build_histogram(targetimg, edges)
     return edges, histogram / sum(histogram), target_histogram / sum(target_histogram)
 end
 
-function construct_pdfs(img::AbstractArray, targetimg::AbstractArray, nbins::Integer = 256)
+function construct_pdfs(img::GenericGrayImage, targetimg::AbstractArray, nbins::Integer = 256)
     if eltype(img) <: AbstractGray
         imin, imax = 0, 1
     else

@@ -201,7 +201,7 @@ function build_histogram(img::GenericGrayImage, edges::AbstractRange)
             elseif val < first(edges)
                 counts[lb] += 1
             else
-                index = floor(Int, (val-first_edge)*inv_step_size) + 1
+                index = floor(Int, gray((val-first_edge)*inv_step_size)) + 1
                 counts[index] += 1
             end
         end

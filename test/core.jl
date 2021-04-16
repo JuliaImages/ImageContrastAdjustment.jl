@@ -12,9 +12,9 @@
         A = rand(Float32,3,5,5)
         img = colorview(RGB, A)
         dc = ImageContrastAdjustment.minfinite(img)-RGB{Float32}(minimum(A, dims=(2,3))...)
-        @test abs(dc) < 1e-6
+        @test norm(dc) < 1e-6
         dc = ImageContrastAdjustment.maxfinite(img)-RGB{Float32}(maximum(A, dims=(2,3))...)
-        @test abs(dc) < 1e-6
+        @test norm(dc) < 1e-6
         @test ImageContrastAdjustment.minfinite(x->x^2,[NaN,10,2]) == 4
         @test ImageContrastAdjustment.maxfinite(x->x^2,[NaN,10,2]) == 100
 end
