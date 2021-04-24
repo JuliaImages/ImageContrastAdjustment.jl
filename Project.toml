@@ -1,7 +1,7 @@
 name = "ImageContrastAdjustment"
 uuid = "f332f351-ec65-5f6a-b3d1-319c6670881a"
 authors = ["Dr. Zygmunt L. Szpak <zygmunt.szpak@gmail.com>"]
-version = "0.3.7"
+version = "0.3.8"
 
 [deps]
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
