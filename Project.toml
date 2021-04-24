@@ -4,14 +4,12 @@ authors = ["Dr. Zygmunt L. Szpak <zygmunt.szpak@gmail.com>"]
 version = "0.3.7"
 
 [deps]
-ColorVectorSpace = "c3611d14-8923-5661-9e6a-0046d554d3a4"
 ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 ImageTransformations = "02fcd773-0e25-5acc-982a-7f6622650795"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 
 [compat]
-ColorVectorSpace = "0.6, 0.7, 0.8, 0.9"
-ImageCore = "0.8.5"
+ImageCore = "0.9"
 ImageTransformations = "0.8.1"
 Parameters = "0.12"
 julia = "1"
