@@ -1,6 +1,5 @@
 module ImageContrastAdjustment
 
-using ColorVectorSpace
 using ImageCore
 using ImageTransformations: imresize
 # Where possible we avoid a direct dependency to reduce the number of [compat] bounds
