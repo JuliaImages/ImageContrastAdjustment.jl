@@ -1,12 +1,13 @@
 # usage example for package developer:
 #
-#     import HistogramAdjustmentAPI: AbstractHistogramAdjustmentAlgorithm,
+#     import ContrastAdjustmentAPI: AbstractHistogramAdjustmentAlgorithm,
 #                             adjust_histogram, adjust_histogram!
 
 """
     AbstractHistogramAdjustmentAlgorithm <: AbstractImageFilter
 
-The root type for `ImageContrastAdjustment` package.
+A root type for `ImageContrastAdjustment` package that relates to algorithms
+that manipulate contrast by operating on intensity histograms.
 
 Any concrete histogram adjustment algorithm shall subtype it to support
 [`adjust_histogram`](@ref) and [`adjust_histogram!`](@ref) APIs.
@@ -18,7 +19,7 @@ following pattern:
 
 ```julia
 # first generate an algorithm instance
-f = LinearStretching()
+f = Equalization()
 
 # then pass the algorithm to `adjust_histogram`
 img_adjusted = adjust_histogram(img, f)
