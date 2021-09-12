@@ -27,6 +27,7 @@ include("algorithms/gamma_correction.jl")
 include("algorithms/matching.jl")
 include("algorithms/midway_equalization.jl")
 include("compat.jl")
+include("deprecations.jl")
 
 export
     # main types and functions
