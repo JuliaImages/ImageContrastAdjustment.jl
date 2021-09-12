@@ -1,11 +1,11 @@
 
 """
 ```
-    GammaCorrection <: AbstractHistogramAdjustmentAlgorithm
+    GammaCorrection <: AbstractIntensityAdjustmentAlgorithm
     GammaCorrection(; gamma = 1)
 
-    adjust_histogram([T,] img, f::GammaCorrection)
-    adjust_histogram!([out,] img, f::GammaCorrection)
+    adjust_intensity([T,] img, f::GammaCorrection)
+    adjust_intensity!([out,] img, f::GammaCorrection)
 ```
 
 Returns a gamma corrected image.
@@ -36,7 +36,7 @@ tool.
 
 # Options
 
-Various options for the parameters of the `adjust_histogram` function and the
+Various options for the parameters of the `adjust_intensity` function and the
 `Gamma` type are described in more detail below.
 
 ## Choices for `img`
@@ -65,7 +65,7 @@ intensities = 0.0:(1.0/n):1.0
 img = repeat(intensities, inner=(20,20))'
 
 # Brighten the dark tones.
-imgadj = adjust_histogram( img, GammaCorrection(gamma = 1/2))
+imgadj = adjust_intensity( img, GammaCorrection(gamma = 1/2))
 
 # Display the original and adjusted image.
 imshow(img)
@@ -75,7 +75,7 @@ imshow(imgadj)
 # References
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 """
-@with_kw struct GammaCorrection{T <: Real} <: AbstractHistogramAdjustmentAlgorithm
+@with_kw struct GammaCorrection{T <: Real} <: AbstractIntensityAdjustmentAlgorithm
     gamma::T = 1.0
 end
 
