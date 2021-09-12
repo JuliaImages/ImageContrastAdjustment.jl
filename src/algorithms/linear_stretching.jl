@@ -1,7 +1,7 @@
 
 """
 ```
-    LinearStretching <: AbstractHistogramAdjustmentAlgorithm
+    LinearStretching <: AbstractIntensityAdjustmentAlgorithm
     LinearStretching(; [src_minval], [src_maxval],
                        dst_minval=0, dst_maxval=1,
                        no_clamp=false)
@@ -10,8 +10,8 @@
     LinearStretching((src_minval, src_maxval) => nothing)
     LinearStretching(nothing => (dst_minval, dst_maxval))
 
-    adjust_histogram([T,] img, f::LinearStretching)
-    adjust_histogram!([out,] img, f::LinearStretching)
+    adjust_intensity([T,] img, f::LinearStretching)
+    adjust_intensity!([out,] img, f::LinearStretching)
 ```
 
 Returns an image where the range of the intensities spans the interval [`dst_minval`, `dst_maxval`].
@@ -31,7 +31,7 @@ f(x) = (x-A) \\frac{b-a}{B-A} + a.
 
 # Options
 
-Various options for the parameters of the `adjust_histogram` and
+Various options for the parameters of the `adjust_intensity` and
 `LinearStretching` type  are described in more detail below.
 
 ## Choices for `img`
@@ -70,7 +70,7 @@ using ImageContrastAdjustment, TestImages
 
 img = testimage("mandril_gray")
 # Stretches the contrast in `img` so that it spans the unit interval.
-imgo = adjust_histogram(img, LinearStretching(dst_minval = 0, dst_maxval = 1))
+imgo = adjust_intensity(img, LinearStretching(dst_minval = 0, dst_maxval = 1))
 ```
 
 For convenience, Constructing a `LinearStretching` object using `Pair` is also supported
@@ -91,7 +91,7 @@ LinearStretching((0.1, 0.9) => nothing)
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 
 """
-@with_kw struct LinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm
+@with_kw struct LinearStretching{T} <: AbstractIntensityAdjustmentAlgorithm
     src_minval::T = nothing
     src_maxval::T = nothing
     dst_minval::T = 0.0f0
