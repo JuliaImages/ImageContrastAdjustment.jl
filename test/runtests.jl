@@ -11,4 +11,5 @@ using Test, ImageCore, ImageFiltering, TestImages, LinearAlgebra
     include("gamma_adjustment.jl")
     include("linear_stretching.jl")
     include("contrast_stretching.jl")
+    include("piecewise_linear_stretching.jl")
 end

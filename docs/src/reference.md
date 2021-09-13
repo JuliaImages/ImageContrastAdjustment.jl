@@ -48,3 +48,8 @@ Matching
 ```@docs
 MidwayEqualization
 ```
+
+### PiecewiseLinearStretching
+```@docs
+PiecewiseLinearStretching
+```

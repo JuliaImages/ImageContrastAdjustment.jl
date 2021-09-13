@@ -24,6 +24,7 @@ include("algorithms/contrast_stretching.jl")
 include("algorithms/gamma_correction.jl")
 include("algorithms/matching.jl")
 include("algorithms/midway_equalization.jl")
+include("algorithms/piecewise_linear_stretching.jl")
 include("compat.jl")
 
 export
@@ -35,6 +36,7 @@ export
     GammaCorrection,
     LinearStretching,
     ContrastStretching,
+    PiecewiseLinearStretching,
     build_histogram,
     adjust_histogram,
     adjust_histogram!
