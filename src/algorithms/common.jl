@@ -19,6 +19,7 @@ end
 
 function build_lookup(cdf, minval::T, maxval::T) where T
     first_cdf = first(cdf)
+    # Scale the new intensity value to so that it lies in the range [minval, maxval].
     scale = (maxval - minval) / (cdf[end] - first_cdf)
     if T <: Integer
         return T[ceil(minval + (x - first_cdf) * scale) for x in cdf]
