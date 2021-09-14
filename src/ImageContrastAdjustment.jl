@@ -7,9 +7,11 @@ using ImageCore.MappedArrays
 using Parameters: @with_kw # Same as Base.@kwdef but works on Julia 1.0
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
-include("HistogramAdjustmentAPI/HistogramAdjustmentAPI.jl")
-import .HistogramAdjustmentAPI: AbstractHistogramAdjustmentAlgorithm,
-                                adjust_histogram, adjust_histogram!
+include("ContrastAdjustmentAPI/ContrastAdjustmentAPI.jl")
+import .ContrastAdjustmentAPI: AbstractHistogramAdjustmentAlgorithm,
+                                adjust_histogram, adjust_histogram!,
+                              AbstractIntensityAdjustmentAlgorithm,
+                                adjust_intensity, adjust_intensity!
 
 # TODO Relax this to all image color types
 const GenericGrayImage = AbstractArray{<:Union{Number, AbstractGray}}
@@ -37,6 +39,8 @@ export
     ContrastStretching,
     build_histogram,
     adjust_histogram,
-    adjust_histogram!
+    adjust_histogram!,
+    adjust_intensity,
+    adjust_intensity!
 
 end # module
