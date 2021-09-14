@@ -1,26 +1,29 @@
-function transform_density!(img::GenericGrayImage, edges::AbstractRange, cdf::AbstractVector, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray})
+function transform_density!(out::GenericGrayImage, img::GenericGrayImage, edges::AbstractRange, newvals::AbstractVector)
     first_edge, last_edge = first(edges), last(edges)
-    first_cdf, last_cdf = first(cdf), last(cdf)
+    first_newval, last_newval = first(newvals), last(newvals)
     inv_step_size = 1/step(edges)
-    scale = (maxval - minval) / (cdf[end] - first(cdf))
     function transform(val)
         val = gray(val)
         if val >= last_edge
-            newval = last_cdf
+            return last_newval
         elseif val < first_edge
-            newval = first_cdf
+            return first_newval
         else
             index = floor(Int, (val-first_edge)*inv_step_size) + 1
-            @inbounds newval = cdf[index]
+            @inbounds newval = newvals[index]
+            return newval
         end
-        # Scale the new intensity value to so that it lies in the range [minval, maxval].
-        newval = minval + (newval - first_cdf) * scale
     end
-    if eltype(img) <: Integer
-        map!(val->ceil(transform(val)), img, img)
-    else
-        map!(transform, img, img)
+    map!(transform, out, img)
+end
+
+function build_lookup(cdf, minval::T, maxval::T) where T
+    first_cdf = first(cdf)
+    scale = (maxval - minval) / (cdf[end] - first_cdf)
+    if T <: Integer
+        return T[ceil(minval + (x - first_cdf) * scale) for x in cdf]
     end
+    return T[minval + (x - first_cdf) * scale for x in cdf]
 end
 
 function construct_pdfs(img::GenericGrayImage, targetimg::AbstractArray, edges::AbstractRange)
