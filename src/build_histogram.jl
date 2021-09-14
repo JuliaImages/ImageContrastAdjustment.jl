@@ -188,17 +188,16 @@ function build_histogram(img::GenericGrayImage, edges::AbstractRange)
     Base.has_offset_axes(edges) && throw(ArgumentError("edges must be indexed starting with 1"))
     lb = first(axes(edges,1))-1
     ub = last(axes(edges,1))
-    first_edge = first(edges)
+    first_edge, last_edge = first(edges), last(edges)
     inv_step_size = 1/step(edges)
     counts = fill(0, lb:ub)
-    for val in img
+    @inbounds for val in img
          if isnan(val)
              continue
          else
-            if val >= edges[end]
-                counts[end] += 1
-                continue
-            elseif val < first(edges)
+            if val >= last_edge
+                counts[ub] += 1
+            elseif val < first_edge
                 counts[lb] += 1
             else
                 index = floor(Int, gray((val-first_edge)*inv_step_size)) + 1
