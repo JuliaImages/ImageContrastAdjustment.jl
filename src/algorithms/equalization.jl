@@ -104,13 +104,14 @@ imshow(imgeq)
 end
 
 function (f::Equalization)(out::GenericGrayImage, img::GenericGrayImage)
-    edges, histogram = build_histogram(img, f.nbins, minval = f.minval, maxval = f.maxval)
+    minval, maxval = convert(eltype(out), f.minval), convert(eltype(out), f.maxval)
+    edges, histogram = build_histogram(img, f.nbins, minval = minval, maxval = maxval)
     lb = first(axes(histogram,1))
     ub = last(axes(histogram,1))
     N = length(img)
     cdf = cumsum(histogram[lb:ub]/N)
-    out .= img
-    transform_density!(out, edges, cdf, f.minval, f.maxval)
+    newvals = build_lookup(cdf, minval, maxval)
+    transform_density!(out, img, edges, newvals)
 end
 
 function (f::Equalization)(out::AbstractArray{<:Color3}, img::AbstractArray{<:Color3})
