@@ -17,6 +17,21 @@ function transform_density!(out::GenericGrayImage, img::GenericGrayImage, edges:
     map!(transform, out, img)
 end
 
+function transform_density!(out::GenericGrayImage, img::GenericGrayImage{T}, edges::AbstractRange, newvals::AbstractVector) where T<:Union{N0f8,AbstractGray{N0f8}}
+    # When dealing with 8-bit images, we can improve computational performance by precomputing the lookup table
+    # for how the intensities transform (there are only 256 calculations of intensities rather than `length(img)`
+    # calculations of intensities).
+    lookup = Vector{eltype(newvals)}(undef, 256)
+    invoke(transform_density!, Tuple{GenericGrayImage,GenericGrayImage,AbstractRange,AbstractVector},
+                               lookup, zero(T):eps(T):oneunit(T), edges, newvals)
+    map!(out, img) do val
+        lookup[uint8val(val)+1]
+    end
+end
+
+uint8val(x::N0f8) = reinterpret(x)
+uint8val(x::AbstractGray) = uint8val(gray(x))
+
 function build_lookup(cdf, minval::T, maxval::T) where T
     first_cdf = first(cdf)
     # Scale the new intensity value to so that it lies in the range [minval, maxval].
