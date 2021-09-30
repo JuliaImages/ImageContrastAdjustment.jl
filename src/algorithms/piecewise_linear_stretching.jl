@@ -1,16 +1,19 @@
 """
 ```
     PiecewiseLinearStretching <: AbstractHistogramAdjustmentAlgorithm
-    PiecewiseLinearStretching(;  src_intervals = (0.0 => 0.1, 0.1 => 0.9, 0.9 => 1.0), 
-                                 dst_intervals = (0.0 => 0.2, 0.2 => 1.0, 1.0 => 1.0))
-
+    PiecewiseLinearStretching((0.0, 0.2, 0.8, 1.0), (0.0, 0.1, 0.7, 1.0) ; saturate = true)
+    PiecewiseLinearStretching([0.0, 0.2, 0.8, 1.0], [0.0, 0.1, 0.7, 1.0] ; saturate = true)
+    PiecewiseLinearStretching(; src_knots = (0.0, 0.2, 0.8, 1.0), 
+                                dst_knots = (0.0, 0.1, 0.7, 1.0), saturate = true)
+    PiecewiseLinearStretching(ClosedInterval(0.0, 0.2) => ClosedInterval(0.0, 0.1),
+                              Interval{:open, :closed}(0.2, 0.8) => Interval{:open, :closed}(0.1, 0.7),
+                              Interval{:open, :closed}(0.8, 1,0) => Interval{:open, :closed}(0.7, 1.0))
     adjust_histogram([T,] img, f::PiecewiseLinearStretching)
     adjust_histogram!([out,] img, f::PiecewiseLinearStretching)
 ```
 
-Returns an image for which the intensity range was partitioned into subintervals (specified
-by `src_intervals`) and mapped linearly to a new set of subintervals
-(specified by `dst_intervals`). 
+When used with `adjust_histogram`, returns an image for which the intensity range was
+partitioned into subintervals  and mapped linearly to a new set of subintervals. 
 
 # Details
 
@@ -48,41 +51,65 @@ type and the intensities of the Y channel are stretched to the specified range. 
 Y channel is then combined with the I and Q channels and the resulting image converted to
 the same type as the input.
 
-## Choices for `src_intervals` 
+## Specifying intervals explicitly
+One can specify the mappings between source and destination intervals using
+the interval types provided by [IntervalSets.jl](https://github.com/JuliaMath/IntervalSets.jl).
+For instance, the mappings [0, 0.2] => [0, 0.1], (0.2, 0.8] => (0.1, 0.7] and (0.8, 1.0] =>
+(0.7, 1.0] can be specified as follows:
+```julia
+PiecewiseLinearStretching(ClosedInterval(0.0, 0.2) => ClosedInterval(0.0, 0.1),
+                          Interval{:open, :closed}(0.2, 0.8) => Interval{:open, :closed}(0.1, 0.7),
+                          Interval{:open, :closed}(0.8, 1,0) => Interval{:open, :closed}(0.7, 1.0))
+```
+While this manner of specifying intervals permits the most flexibility, it is
+cumbersome for many types of mappings one would like to specify in practice. 
+Hence, one can instead specify the mappings by designating a sequence of knot pairs. 
 
-The `src_intervals` must be specified as an `ntuple` of pairs. For example,
-`src_intervals = (0.0 => 0.2, 0.2 => 0.8, 0.8 => 1.0)` partitions the unit
-interval into three subintervals, [0.0, 0.2], (0.2, 0.8] and (0.8, 1.0]. 
+## Specifying intervals implicitly
+As an alternative to specifying the endpoints of each interval, one can list the knots of
+the intervals. For instance, the mappings [0.0, 0.2] => [0, 0.1], (0.2, 0.8] => (0.1, 0.7]
+and (0.8, 1.0] => (0.7, 1.0] can be listed as follows:
 
+```julia
+# Without the use of keyword arguments.
+PiecewiseLinearStretching((0.0, 0.2, 0.8, 1.0), (0.0, 0.1, 0.7, 1.0))
+# With the use of keyword arguments.
+PiecewiseLinearStretching(src_knots = (0.0, 0.2, 0.8, 1.0), dst_knots = (0.0, 0.1, 0.7, 1.0))
+```
+
+## Constraints on intervals and knots. 
 To specify a single interval you must include a trailing comma, e.g.
-`src_intervals = (0.0 => 1.0,)`. 
+```julia
+# Using the ellipses notation provided by IntervalSets.jl
+f = PiecewiseLinearStretching((0.0..1.0 => 0.2..1.0,))
+# Using the types provided by IntervalSets.jl
+f = PiecewiseLinearStretching(ClosedInterval(0.0, 1.0) => ClosedInterval(0.2, 1.0),)
+```
 
-The start and end of a subinterval in `src_intervals` cannot be equal. For example,
-`src_intervals = (0.0 => 0.5, 0.5 => 0.5, 0.5 => 1.0)` will result in an `ArgumentError`
-because of the pair `0.5 => 0.5`.
+The endpoints of any source interval cannot be equal. For example, `ClosedInterval(0.5, 0.5)
+=> ClosedInterval(0.0, 1.0)` is not permitted because the value `0.5` cannot be
+simultaneously mapped to `0.0` and `1.0`. There is no such constraint for the destination
+interval. For instance, `ClosedInterval(0.0, 1.0) => ClosedInterval(0.5, 0.5)` is permitted
+and corresponds to mapping all intensities in the unit interval to the value `0.5`. 
 
-## Choices for `dst_intervals` 
+Care must be taken to ensure that the destination subintervals  are representable within the
+type of image on which the piecewise linear stretching will be applied. For example, if you
+specify a negative output interval like `(0.0..1.0 => -1.0..0,),` and try to apply the
+transformation on an image with type `Gray{N0f8}`, you will receive a DomainError. 
 
-The `dst_intervals` must be specified as an `ntuple` of pairs and there needs to be a
-corresponding pair for each pair in `src_intervals`.
-    
-Unlike `src_intervals`, the start and end of an interval in `src_intervals` can be equal.
-For example, the combination `src_intervals = (0.0 => 0.5, 0.5 => 1.0)` and `dst_intervals =
-(0.0 => 0.0 , 1.0 => 1.0)` will produce a binary image. 
+When listing knots, the length of `src_knots` must match the length of `dst_knots`.
 
-Care must be taken to ensure that the subintervals specified in `dst_intervals` are
-representable within the type of image on which the piecewise linear stretching will be
-applied. For example, if you specify a negative output interval like `dst_intervals = (1.0
-=> -1.0),` and try to apply the transformation on an image with type `Gray{N0f8}`, you will
-receive a DomainError. 
 
 ## Saturating pixels
 
-If the specified `src_intervals` don't span the entire range of intensities in an image,
-then intensities that fall outside `src_intervals` are automatically set to the boundary
-values of the `dst_intervals`. For example, given the combination `src_intervals = (0.1 =>
-0.9, )` and `dst_intervals = (0.0 => 1.0)`, intensities below `0.1` are set to zero, and
-intensities above `0.9` are set to one. 
+When listing knots, one has the option of saturating pixels that fall outside the endpoints
+of the source knots to the endpoints of the destination knots (this option is enabled by default). For example,
+```julia
+f = PiecewiseLinearStretching(src_knots = (0.2, 0.8), dst_knots = (0.0, 1.0); saturate = true)
+```
+will ensure that any image intensities below `0.2` are set to zero, and any intensities above
+`0.8` are set to one, whilst also linearly stretching the interval `[0.2, 0.8]` to `[0.0. 1.0]`.
+
 
 # Example
 
@@ -90,35 +117,109 @@ intensities above `0.9` are set to one.
 using ImageContrastAdjustment, TestImages
 
 img = testimage("mandril_gray")
-# Stretches the contrast in `img` so that it spans the unit interval.
-f = PiecewiseLinearStretching(src_intervals = (0.0 => 0.2, 0.2 => 0.8, 0.8 => 1.0),
-                              dst_intervals = (0.0 => 0.4, 0.4 => 0.9, 0.9 => 1.0))
+f = PiecewiseLinearStretching((0.0, 0.2, 0.8, 1.0), (0.0, 0.1, 0.7, 1.0))
 imgo = adjust_histogram(img, f)
 ```
 
 # References
 1. W. Burger and M. J. Burge. *Digital Image Processing*. Texts in Computer Science, 2016. [doi:10.1007/978-1-4471-6684-9](https://doi.org/10.1007/978-1-4471-6684-9)
 """
-@with_kw struct PiecewiseLinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm where T <: NTuple{N, Pair{<: Union{Real, AbstractGray}, <: Union{Real, AbstractGray}}} where {N}
-    src_intervals::T = (0.0 => 0.1, 0.1 => 0.9, 0.9 => 1.0)
-    dst_intervals::T = (0.0 => 0.2, 0.2 => 1.0, 1.0 => 1.0)
-    function PiecewiseLinearStretching(src_intervals::T₁, dst_intervals::T₂) where {T₁ <: NTuple{N₁, Pair{<: Union{Real, AbstractGray}, <: Union{Real, AbstractGray}}} where {N₁}, T₂ <: NTuple{N₂, Pair{<: Union{Real, AbstractGray}, <: Union{Real, AbstractGray}}} where {N₂}}  
-        length(src_intervals) == length(dst_intervals) ||  throw(ArgumentError("The dst_intervals must define an interval pair for each consecutive src_interval pair, i.e. length(src_intervals) == length(dst_intervals)."))
-        for src_pair in src_intervals
-            if first(src_pair) == last(src_pair) 
-                throw(ArgumentError("The start and end of an interval in src_intervals cannot be equal."))
+struct PiecewiseLinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm where T <: Tuple{Vararg{Pair}}
+    intervals::T 
+    function PiecewiseLinearStretching(intervals::T₁) where T₁ <: Tuple{Vararg{Pair}} 
+        for (src, _) in intervals
+            if leftendpoint(src) == rightendpoint(src) 
+                throw(ArgumentError("The start and end of a src interval cannot be equal."))
             end
         end
-        T = promote_type(T₁, T₂)
-        new{T}(src_intervals, dst_intervals)
+        new{T₁}(intervals)
     end    
 end
 
+function PiecewiseLinearStretching(img::GenericGrayImage)
+    T = eltype(img)
+    img_min, img_max = minfinite(img), maxfinite(img)  
+    if (img_min ≈ img_max)
+        throw(DomainError("The image consists of a single intensity, which gives rise to a degenerate source interval."))
+    end  
+    src_knots = (img_min, img_max)
+    dst_knots - (zero(T), one(T))
+    return PiecewiseLinearStretching(src_knots, dst_knots; saturate = true)
+end
+
+function PiecewiseLinearStretching(; src_knots, dst_knots, saturate::Bool = true)
+    PiecewiseLinearStretching(src_knots, dst_knots; saturate = saturate)
+end
+
+function PiecewiseLinearStretching(src_knots::AbstractVector, dst_knots::AbstractVector; saturate::Bool = true)
+    return PiecewiseLinearStretching(tuple(src_knots...), tuple(dst_knots...); saturate = saturate)
+end
+
+function PiecewiseLinearStretching(src_knots::Tuple{Vararg{Union{Real,AbstractGray}}}, dst_knots::Tuple{Vararg{Union{Real,AbstractGray}}}; saturate::Bool = true) 
+    if length(src_knots) != length(dst_knots)
+        throw(ArgumentError("You number of src and destination knots must match."))
+    end
+
+    if length(src_knots) < 2 || length(dst_knots) < 2
+        throw(ArgumentError("You need to specify at least two knots (the start and end of an interval)."))
+    end
+
+    # Promote the src_knots and dst_knots to a common type to address the case
+    # where someone might use a mixture of integers and floating point numbers
+    # when specifying the knots. 
+    T₁ = promote_type(typeof.(src_knots)...)
+    T₂ = promote_type(typeof.(dst_knots)...)
+    T = promote_type(T₁, T₂)
+
+    if saturate 
+        intervals = convert_knots_to_intervals_and_saturate(T.(src_knots), T.(dst_knots))
+    else
+        intervals = convert_knots_to_intervals(T.(src_knots), T.(dst_knots))
+    end   
+
+    return PiecewiseLinearStretching(tuple(intervals...))
+end
+
+function convert_knots_to_intervals(src_knots::NTuple{N, <:Union{Real,AbstractGray}}, dst_knots::NTuple{N, <:Union{Real,AbstractGray}}) where {N}
+    intervals = Vector{Pair{<:AbstractInterval, <: AbstractInterval}}(undef, N-1)
+    for n = 1:(N-1)
+        iₛ = src_knots[n] 
+        jₛ = dst_knots[n] 
+        iₑ = src_knots[n+1]
+        jₑ = dst_knots[n+1]
+        if n == 1
+            interval = ClosedInterval(iₛ, iₑ) => ClosedInterval(jₛ, jₑ)
+            intervals[n] = interval
+        else
+            interval = Interval{:open, :closed}(iₛ, iₑ) => Interval{:open, :closed}(jₛ, jₑ)
+            intervals[n] = interval
+        end
+    end
+    return intervals
+end
+
+function convert_knots_to_intervals_and_saturate(src_knots::NTuple{N, <:Union{Real,AbstractGray}}, dst_knots::NTuple{N, <:Union{Real,AbstractGray}}) where {N}
+    intervals = convert_knots_to_intervals(src_knots, dst_knots)
+    lb = gray(typemin(eltype(src_knots)))
+    ub = gray(typemax(eltype(src_knots)))
+    lb = lb == -Inf ? lb = nextfloat(-Inf) : lb
+    ub = ub == Inf ? ub = prevfloat(Inf) : ub
+
+    # Values that fall outside the first and last source knot get clamped to the first and
+    # last destination knot, respectively. 
+    interval₁ = Interval{:closed, :open}(lb, first(src_knots)) => ClosedInterval(first(dst_knots), first(dst_knots))
+    interval₂ = Interval{:open, :closed}(last(src_knots), ub) => ClosedInterval(last(dst_knots), last(dst_knots))
+    push!(intervals, interval₁)
+    push!(intervals, interval₂)
+    return intervals
+end
+
 function (f::PiecewiseLinearStretching)(out::GenericGrayImage, img::GenericGrayImage) 
-    # Verify that the specified dst_intervals fall inside the permissible range
+    # Verify that the specified destination intervals fall inside the permissible range
     # of the output type. 
     T = eltype(out)
-    for (a,b) in f.dst_intervals
+    for (_, dst) in f.intervals
+        (a,b) = endpoints(dst)
         p = typemin(T)
         r = typemax(T)
         if  !(p <= a <= r) || !(p <= b <= r)
@@ -129,12 +230,12 @@ function (f::PiecewiseLinearStretching)(out::GenericGrayImage, img::GenericGrayI
     # the formula f(x) = (x-A) * ((b-a)/(B-A)) + a. The operation r * x - o is equivalent to
     # (x-A) * ((b-a)/(B-A)) + a. Precalculate the r and o so that later on an inner loop
     # contains only multiplication and addition to get better performance.
-    N = length(f.src_intervals)
+    N = length(f.intervals)
     rs = zeros(Float64, N)
     os = zeros(Float64, N)
-    for (src, dst) in zip(pairs(f.src_intervals), pairs(f.dst_intervals)) 
-        n, (A,B) = src
-        _, (a,b) = dst   
+    for (n, (src, dst)) in enumerate(f.intervals) 
+        (A,B) = endpoints(src)
+        (a,b) = endpoints(dst)   
         rs[n] = (b - a) / (B - A)
         os[n] = (A*b - B*a) / (B - A)
     end
@@ -147,8 +248,8 @@ function (f::PiecewiseLinearStretching)(out::GenericGrayImage, img::GenericGrayI
             out[p] = val
         else
             is_inside_src_intervals = false
-            for (n, (A,B)) in pairs(f.src_intervals)                                 
-                if (A <= val < B) || (A <= val <= B && n == N)       
+            for (n, (src, _)) in enumerate(f.intervals)                            
+                if val ∈ src     
                     newval = rs[n] * val - os[n]                                                                          
                     out[p] = T <: Integer ? round(Int, newval) : newval  
                     is_inside_src_intervals = true  
@@ -156,14 +257,8 @@ function (f::PiecewiseLinearStretching)(out::GenericGrayImage, img::GenericGrayI
                 end                                                                                                    
             end 
             if !is_inside_src_intervals
-                # Saturate pixels that fall outside the specified src_intervals by setting
-                # them equal to the start/end of the edge dst_intervals. 
-                a = first(first(f.dst_intervals))
-                b = last(last(f.dst_intervals))
-                A = first(first(f.src_intervals))
-                newval = val < A ? a : b
-                out[p] = T <: Integer ? round(Int, newval) : newval  
-            end 
+                out[p] = val
+            end
         end
     end
    return out                                                                                                                                                                                                             
@@ -175,5 +270,4 @@ function (f::PiecewiseLinearStretching)(out::AbstractArray{<:Color3}, img::Abstr
     yiq_view = channelview(yiq)
     adjust_histogram!(view(yiq_view,1,:,:), f)
     out .= convert.(T, yiq)
-end
-                                                                                                                                                                                                   
+end                                                                                                                                                                                               

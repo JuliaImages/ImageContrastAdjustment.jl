@@ -4,7 +4,10 @@ using ImageCore
 using ImageTransformations: imresize
 # Where possible we avoid a direct dependency to reduce the number of [compat] bounds
 using ImageCore.MappedArrays
+using IntervalSets
 using Parameters: @with_kw # Same as Base.@kwdef but works on Julia 1.0
+using Reexport
+@reexport using IntervalSets
 
 # TODO: port HistogramAdjustmentAPI to ImagesAPI
 include("HistogramAdjustmentAPI/HistogramAdjustmentAPI.jl")

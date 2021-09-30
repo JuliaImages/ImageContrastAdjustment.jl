@@ -1,30 +1,23 @@
 @testset "Piecewise Linear Stretching" begin
 
     @testset "constructors" begin
-        @test_throws ArgumentError PiecewiseLinearStretching(
-                                src_intervals = ((0.0 => 0.2),(0.2 => 0.2), (0.8 => 1.0)), 
-                                dst_intervals = ((0.0 => 0.2),(-1.0 => 0.0),(1 => -2)))
-  
-        @test_throws ArgumentError PiecewiseLinearStretching(
-                                src_intervals = ((0.0 => 0.2),(0.2 => 0.8), (0.8 => 1.0)), 
-                                dst_intervals = ((0.0 => 0.2), (1 => -2)))      
+        @test_throws ArgumentError PiecewiseLinearStretching((0..0.2 => 0..0.4, 0.2..0.2 => 0.4..1.0))
+        @test_throws ArgumentError PiecewiseLinearStretching((0, 0.2, 0.2, 1), (0.0, 0, 0, 1))   
+        @test_throws ArgumentError PiecewiseLinearStretching(src_knots = (0, 0.2, 1), dst_knots = (0.0, 0, 0, 1))
     end
+
     @testset "miscellaneous" begin
         # We should be able to invert the image. 
-        f = PiecewiseLinearStretching(src_intervals = (0.0 => 1.0,), dst_intervals = (1.0 => 0.0,))   
-        for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
-            img = T.(testimage("mandril_gray"))
-            ret = adjust_histogram(img, f)
-            @test ret ≈ (1 .- img)
-        end  
-
+         f = PiecewiseLinearStretching((0, 1), (1, 0))   
+         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
+             img = T.(testimage("mandril_gray"))
+             ret = adjust_histogram(img, f)
+             @test ret ≈ (1 .- img)
+         end 
         # We should be able to binarize the image. 
-        f = PiecewiseLinearStretching(
-                                      src_intervals = ((0.0 => 0.5), (0.5 => 1.0)), 
-                                      dst_intervals = ((0.0 => 0.0),(1.0 => 1.0)))
+        f = PiecewiseLinearStretching((0.0..0.5 => 0..0, 0.5..1.0 => 1..1))
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
             img = T.(testimage("mandril_gray"))
-
             ret = adjust_histogram(img, f)
             vals = sort(unique(ret))
             @test first(vals) == 0.0
@@ -34,9 +27,7 @@
         # Setting the src_intervals equal to the dst_intervals should result in an identity
         # mapping (no change to the image) provided that the src_intervals span the entire
         # permissible contrast range, i.e. the unit interval. 
-        f = PiecewiseLinearStretching(
-                                src_intervals = ((0.0 => 0.3), (0.3 => 0.8), (0.8 => 1.0)), 
-                                dst_intervals = ((0.0 => 0.3), (0.3 => 0.8), (0.8 => 1.0)))
+        f = PiecewiseLinearStretching((0, 0.3, 0.8 , 1.0), (0, 0.3, 0.8, 1.0))
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
             img = T.(testimage("mandril_gray"))
             ret = adjust_histogram(img, f)
@@ -46,14 +37,25 @@
         # If the src_intervals equal the dst_intervals, but the src_intervals don't span the
         # entire permissible contrast range, i.e. the unit interval, then the resulting
         # image will not match the original image because pixels that fall outside the
-        # specified src_intervals are satuared to the edge value of src_intervals. 
-        f = PiecewiseLinearStretching(
-                                      src_intervals = ((0.3 => 0.8),), 
-                                      dst_intervals = ((0.3 => 0.8),))
+        # specified src_intervals are saturated to the edge value of src_intervals if
+        # saturate = true. 
+        f = PiecewiseLinearStretching([0.3, 0.8], [0.3, 0.8]; saturate = true )
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
             img = T.(testimage("mandril_gray"))
             ret = adjust_histogram(img, f)
-            @test !isapprox(ret, 1 .- img, atol=1e-1)
+            @test !isapprox(ret, img, atol=1e-1)
+        end  
+
+        # If the src_intervals equal the dst_intervals, but the src_intervals don't span the
+        # entire permissible contrast range, i.e. the unit interval, then the resulting
+        # image will match the original image because pixels that fall outside the
+        # specified src_intervals are not saturated to the edge value of src_intervals if
+        # saturate = false
+        f = PiecewiseLinearStretching([0.3, 0.8], [0.3, 0.8]; saturate = false )
+        for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
+            img = T.(testimage("mandril_gray"))
+            ret = adjust_histogram(img, f)
+            @test ret ≈ img
         end  
 
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
@@ -65,7 +67,7 @@
             img = T.(collect(reshape(1/100:1/100:1, 10, 10)))
             minval = minimum(img)
             maxval = maximum(img)
-            f = PiecewiseLinearStretching(src_intervals = (minval => maxval,), dst_intervals = (minval => maxval,))   
+            f = PiecewiseLinearStretching((minval..maxval => minval..maxval,))   
             ret =  adjust_histogram(img, f)
             if T <: Gray{Float32} || T <: Gray{Float64}
                 @test all(map((i, r) -> isapprox(i, r), img, ret))
@@ -86,7 +88,7 @@
             img = T.(collect(reshape(1/100:1/100:1, 10, 10)))
             minval = minimum(img)
             maxval = maximum(img)
-            f = PiecewiseLinearStretching(src_intervals = (minval => maxval,), dst_intervals = (0.0 => 1.0,)) 
+            f = PiecewiseLinearStretching((minval..maxval => 0.0..1.0,)) 
             ret =  adjust_histogram(img, f)
             @test isapprox(0, first(ret))
             @test isapprox(1, last(ret))
@@ -97,13 +99,13 @@
             img = T.(testimage("mandril_gray"))
             minval = minimum(img)
             maxval = maximum(img)
-            f = PiecewiseLinearStretching(src_intervals = (minval => maxval,), dst_intervals = (0.0 => 1.0,)) 
+            f = PiecewiseLinearStretching((minval..maxval => 0.0..1.0,)) 
             ret = adjust_histogram(img, f)
             @test eltype(ret) == eltype(img)
             @test isapprox(0, minimum(ret))
             @test isapprox(1, maximum(ret))
 
-            f = PiecewiseLinearStretching(src_intervals = (0.0 => 1.0,), dst_intervals = (0.2 => 0.8,)) 
+            f = PiecewiseLinearStretching((0.0..1.0 => 0.2..0.8,)) 
             ret = adjust_histogram(img, f)
             @test eltype(ret) == eltype(img)
             # We are mapping the interval [0, 1] to [0.2, 0.8] but since the 
@@ -114,8 +116,7 @@
             @test maximum(ret) <= 0.8 
 
             # Verify that results are correctly clamped to [0.2, 0.9] if it exceeds the range
-            f = PiecewiseLinearStretching(src_intervals = (0.3 => 0.8,),
-                                          dst_intervals = (0.2 => 0.9,))
+            f = PiecewiseLinearStretching((0.3, 0.8), (0.2, 0.9))
             ret = adjust_histogram(img, f)
             @test eltype(ret) == eltype(img)
             @test minimum(ret) == T(0.2)
@@ -124,17 +125,15 @@
 
         img = Float32.(collect(reshape(1/100:1/100:1, 10, 10)))
 
-        f = PiecewiseLinearStretching(src_intervals = ((0.0 => 1.0),), dst_intervals = ((-1.0 => 0.0),))
+        f = PiecewiseLinearStretching((0.0,1.0), (-1.0, 0.0))
         ret = adjust_histogram(img, f)
         @test eltype(ret) == eltype(img)
-        # @test minimum(ret) ≈ -1.0
-        # @test maximum(ret) ≈ 0.0
         @test isapprox(minimum(ret), -1.0, atol=1e-1)
         @test isapprox(maximum(ret), 0.0, atol=1e-1)
         @test_throws DomainError adjust_histogram(Gray{N0f8}.(img), f)
 
         img = Gray{Float32}.(collect(reshape(1/100:1/100:1, 10, 10)))
-        f = PiecewiseLinearStretching(src_intervals = ((0.0 => 0.2), (0.2 => 0.8), (0.8 => 1.0)), dst_intervals = ((0.0 => 0.2), (-1.0 => 0.0), (1 => -2)))
+        f = PiecewiseLinearStretching((0.0..0.2 => 0.0..0.2, 0.2..0.8 => -1.0..0.0, 0.8..1.0 => 1.0..(-2.0)))
         ret = adjust_histogram(img, f)
         @test eltype(ret) == eltype(img)
         @test minimum(ret) ≈ -2.0
@@ -157,8 +156,7 @@
             verify that all 32 bins have non-zero counts. This will confirm that
             the dynamic range of the original image has been increased.
             =#
-            f = PiecewiseLinearStretching(src_intervals = (0.3 => 0.5,), 
-                                          dst_intervals = (0.0 => 1.0,))
+            f = PiecewiseLinearStretching((0.3, 0.5,), (0.0, 1.0))
             ret = adjust_histogram(img, f)
             edges, counts_after = build_histogram(ret, 32, minval = 0, maxval = 1)
             nonzero_after = sum(counts_after .!= 0)
