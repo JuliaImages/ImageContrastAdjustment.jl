@@ -13,6 +13,12 @@ adjust_histogram!
 build_histogram
 ```
 
+## Adjunt Types
+```@docs
+Percentiles
+MinMax
+```
+
 ## Algorithms
 
 ```@docs

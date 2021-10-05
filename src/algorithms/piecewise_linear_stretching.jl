@@ -8,6 +8,9 @@
     PiecewiseLinearStretching(ClosedInterval(0.0, 0.2) => ClosedInterval(0.0, 0.1),
                               Interval{:open, :closed}(0.2, 0.8) => Interval{:open, :closed}(0.1, 0.7),
                               Interval{:open, :closed}(0.8, 1,0) => Interval{:open, :closed}(0.7, 1.0))
+    PiecewiseLinearStretching(Percentiles(1,99), (0,1), img::GenericGrayImage)
+    PiecewiseLinearStretching(Percentiles(1,50,99), (0, 0.5, 1), img::GenericGrayImage)
+    PiecewiseLinearStretching(MinMax(), (0,1), img::GenericGrayImage)                          
     adjust_histogram([T,] img, f::PiecewiseLinearStretching)
     adjust_histogram!([out,] img, f::PiecewiseLinearStretching)
 ```
@@ -65,7 +68,7 @@ While this manner of specifying intervals permits the most flexibility, it is
 cumbersome for many types of mappings one would like to specify in practice. 
 Hence, one can instead specify the mappings by designating a sequence of knot pairs. 
 
-## Specifying intervals implicitly
+## Specifying intervals implicitly as knots
 As an alternative to specifying the endpoints of each interval, one can list the knots of
 the intervals. For instance, the mappings [0.0, 0.2] => [0, 0.1], (0.2, 0.8] => (0.1, 0.7]
 and (0.8, 1.0] => (0.7, 1.0] can be listed as follows:
@@ -75,6 +78,28 @@ and (0.8, 1.0] => (0.7, 1.0] can be listed as follows:
 PiecewiseLinearStretching((0.0, 0.2, 0.8, 1.0), (0.0, 0.1, 0.7, 1.0))
 # With the use of keyword arguments.
 PiecewiseLinearStretching(src_knots = (0.0, 0.2, 0.8, 1.0), dst_knots = (0.0, 0.1, 0.7, 1.0))
+```
+
+## Specifying intervals implicitly as [`Percentiles`](@ref).
+Instead of directly listing knots, one can set them implicitly as percentiles of the 
+image pixels. For example, to may intensities between the 1st and 99th percentile to the
+unit interval one could use the following code:
+```julia
+img = testimage("mandril_gray")
+# Note that you have to pass in the img as an argument to obtain the percentiles. 
+f = PiecewiseLinearStretching(Percentile((1,99)), (0,1), img) 
+img_adjusted = adjust_histogram(img, f)
+```
+
+## Specifing intervals implicitly as [`MinMax`](@ref).
+One can also specify and interval implicitly as the minimum and maximum intensity in an
+image. For example, one can map intensities within the minimum/maximum intensity in an image
+to the unit interval:
+```julia
+img = testimage("mandril_gray")
+# Note that you have to pass in the img as an argument to obtain the minimum and maximum intensities. 
+f = PiecewiseLinearStretching(MinMax(), (0,1), img) 
+img_adjusted = adjust_histogram(img, f)
 ```
 
 ## Constraints on intervals and knots. 
@@ -136,19 +161,66 @@ struct PiecewiseLinearStretching{T} <: AbstractHistogramAdjustmentAlgorithm wher
     end    
 end
 
-function PiecewiseLinearStretching(img::GenericGrayImage)
-    T = eltype(img)
+function PiecewiseLinearStretching(; src_knots, dst_knots, saturate::Bool = true)
+   return PiecewiseLinearStretching(src_knots, dst_knots; saturate = saturate)
+end
+
+function PiecewiseLinearStretching(img::GenericGrayImage; src_knots, dst_knots, saturate::Bool = true)
+    return PiecewiseLinearStretching(src_knots, dst_knots, img; saturate = saturate)
+end
+
+function PiecewiseLinearStretching(src_knots::MinMax, dst_knots::T, img::GenericGrayImage; saturate::Bool = true) where T <: Union{Tuple{Vararg{Union{Real,AbstractGray}}}, AbstractVector, Percentiles}
     img_min, img_max = minfinite(img), maxfinite(img)  
     if (img_min ≈ img_max)
         throw(DomainError("The image consists of a single intensity, which gives rise to a degenerate source interval."))
     end  
-    src_knots = (img_min, img_max)
-    dst_knots - (zero(T), one(T))
-    return PiecewiseLinearStretching(src_knots, dst_knots; saturate = true)
+    if T <: Percentiles
+        return PiecewiseLinearStretching((img_min, img_max), dst_knots, img; saturate = saturate)
+    else
+        return PiecewiseLinearStretching((img_min, img_max), dst_knots; saturate = saturate)
+    end
 end
 
-function PiecewiseLinearStretching(; src_knots, dst_knots, saturate::Bool = true)
-    PiecewiseLinearStretching(src_knots, dst_knots; saturate = saturate)
+function PiecewiseLinearStretching(src_knots::T, dst_knots::MinMax, img::GenericGrayImage; saturate::Bool = true) where T <: Union{Tuple{Vararg{Union{Real,AbstractGray}}}, AbstractVector, Percentiles}
+    img_min, img_max = minfinite(img), maxfinite(img)  
+    if T <: Percentiles
+        return PiecewiseLinearStretching(src_knots, (img_min, img_max), img ; saturate = saturate)
+    else
+        return PiecewiseLinearStretching(src_knots, (img_min, img_max); saturate = saturate)
+    end
+end
+
+function PiecewiseLinearStretching(src_knots::AbstractVector, dst_knots::Tuple{Vararg{Union{Real,AbstractGray}}}; saturate::Bool = true)
+    return PiecewiseLinearStretching(tuple(src_knots...), dst_knots; satureate = saturate)
+end
+
+function PiecewiseLinearStretching(src_knots::Tuple{Vararg{Union{Real,AbstractGray}}}, dst_knots::AbstractVector; saturate::Bool = true)
+    return PiecewiseLinearStretching(src_knots, tuple(dst_knots...); saturate = saturate)
+end
+
+function PiecewiseLinearStretching(src_percentile::Percentiles, dst_percentile::Percentiles, img::GenericGrayImage; saturate::Bool = true) 
+    if length(src_percentile.p) != length(dst_percentile.p)
+        throw(ArgumentError("The number of src percentiles and dst percentiles must match."))
+    end
+    src_knots = percentile(vec(img), collect(src_percentile.p))
+    dst_knots = percentile(vec(img), collect(dst_percentile.p))
+    return PiecewiseLinearStretching(tuple(src_knots...), tuple(dst_knots...); saturate = saturate)
+end
+
+function PiecewiseLinearStretching(src_percentile::Percentiles, dst_knots::T, img::GenericGrayImage; saturate::Bool = true) where T <: Union{Tuple{Vararg{Union{Real,AbstractGray}}}, AbstractVector}
+    if length(src_percentile.p) != length(dst_knots)
+        throw(ArgumentError("The number of src percentiles and destination knots must match."))
+    end
+    src_knots = percentile(vec(img), collect(src_percentile.p))
+    return PiecewiseLinearStretching(tuple(src_knots...), dst_knots; saturate = saturate)
+end
+
+function PiecewiseLinearStretching(src_knots::T, dst_percentile::Percentiles, img::GenericGrayImage; saturate::Bool = true) where T <: Union{Tuple{Vararg{Union{Real,AbstractGray}}}, AbstractVector}
+    if length(src_knots) != length(dst_percentile.p)
+        throw(ArgumentError("The number of src knots and destination percentiles must match."))
+    end
+    dst_knots = percentile(vec(img), collect(dst_percentile.p))
+    return PiecewiseLinearStretching(src_knots, tuple(dst_knots...); saturate = saturate)
 end
 
 function PiecewiseLinearStretching(src_knots::AbstractVector, dst_knots::AbstractVector; saturate::Bool = true)
@@ -157,7 +229,7 @@ end
 
 function PiecewiseLinearStretching(src_knots::Tuple{Vararg{Union{Real,AbstractGray}}}, dst_knots::Tuple{Vararg{Union{Real,AbstractGray}}}; saturate::Bool = true) 
     if length(src_knots) != length(dst_knots)
-        throw(ArgumentError("You number of src and destination knots must match."))
+        throw(ArgumentError("The number of src and destination knots must match."))
     end
 
     if length(src_knots) < 2 || length(dst_knots) < 2

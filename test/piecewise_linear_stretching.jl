@@ -1,9 +1,12 @@
 @testset "Piecewise Linear Stretching" begin
 
     @testset "constructors" begin
+        img = testimage("mandril_gray")
         @test_throws ArgumentError PiecewiseLinearStretching((0..0.2 => 0..0.4, 0.2..0.2 => 0.4..1.0))
         @test_throws ArgumentError PiecewiseLinearStretching((0, 0.2, 0.2, 1), (0.0, 0, 0, 1))   
         @test_throws ArgumentError PiecewiseLinearStretching(src_knots = (0, 0.2, 1), dst_knots = (0.0, 0, 0, 1))
+        @test_throws ArgumentError PiecewiseLinearStretching(src_knots = (0,), dst_knots = (1,))
+        @test_throws ArgumentError PiecewiseLinearStretching(Percentiles(10,50, 100,150), (0, 0.5, 1), img)
     end
 
     @testset "miscellaneous" begin
@@ -121,6 +124,31 @@
             @test eltype(ret) == eltype(img)
             @test minimum(ret) == T(0.2)
             @test maximum(ret) == T(0.9)  
+        end
+
+        # Verify that Percentiles and MinMax works correctly
+        for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})   
+            img = T.(collect(reshape(1/100:1/100:1, 10, 10)))
+            f = PiecewiseLinearStretching(Percentiles((10,90)), MinMax(), img) 
+            ret = adjust_histogram(img, f)
+            @test all(isapprox.(ret[:,1], 0.01, atol = 1e-2))
+            @test all(isapprox.(ret[:,end], 1.0, atol = 1e-2))
+
+            # Same as above, but with keyword arguments.
+            f = PiecewiseLinearStretching(img; src_knots = Percentiles((10,90)), dst_knots = MinMax()) 
+            ret = adjust_histogram(img, f)
+            @test all(isapprox.(ret[:,1], 0.01, atol=1e-2))
+            @test all(isapprox.(ret[:,end], 1.0, atol=1e-2))
+
+            f = PiecewiseLinearStretching(MinMax(), Percentiles((10,90)), img)
+            ret = adjust_histogram(img, f)
+            @test isapprox(ret[1,1], 0.109, atol=1e-2)
+            @test isapprox(ret[end,end], 0.901, atol=1e-2)
+
+            f = PiecewiseLinearStretching(Percentiles(10,90), Percentiles((10,90)), img)
+            ret = adjust_histogram(img, f)
+            @test all(isapprox.(ret[:,1], 0.109, atol=1e-2))
+            @test all(isapprox.(ret[:,end], 0.901, atol=1e-2))
         end
 
         img = Float32.(collect(reshape(1/100:1/100:1, 10, 10)))
