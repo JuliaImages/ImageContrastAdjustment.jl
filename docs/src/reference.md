@@ -13,6 +13,12 @@ adjust_histogram!
 build_histogram
 ```
 
+## Adjunt Types
+```@docs
+Percentiles
+MinMax
+```
+
 ## Algorithms
 
 ```@docs
@@ -47,4 +53,9 @@ Matching
 ### MidwayEqualization
 ```@docs
 MidwayEqualization
+```
+
+### PiecewiseLinearStretching
+```@docs
+PiecewiseLinearStretching
 ```
