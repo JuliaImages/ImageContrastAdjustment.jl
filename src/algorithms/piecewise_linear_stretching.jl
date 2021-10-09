@@ -191,7 +191,7 @@ function PiecewiseLinearStretching(src_knots::T, dst_knots::MinMax, img::Generic
 end
 
 function PiecewiseLinearStretching(src_knots::AbstractVector, dst_knots::Tuple{Vararg{Union{Real,AbstractGray}}}; saturate::Bool = true)
-    return PiecewiseLinearStretching(tuple(src_knots...), dst_knots; satureate = saturate)
+    return PiecewiseLinearStretching(tuple(src_knots...), dst_knots; saturate = saturate)
 end
 
 function PiecewiseLinearStretching(src_knots::Tuple{Vararg{Union{Real,AbstractGray}}}, dst_knots::AbstractVector; saturate::Bool = true)
@@ -279,10 +279,16 @@ function convert_knots_to_intervals_and_saturate(src_knots::NTuple{N, <:Union{Re
 
     # Values that fall outside the first and last source knot get clamped to the first and
     # last destination knot, respectively. 
-    interval₁ = Interval{:closed, :open}(lb, first(src_knots)) => ClosedInterval(first(dst_knots), first(dst_knots))
-    interval₂ = Interval{:open, :closed}(last(src_knots), ub) => ClosedInterval(last(dst_knots), last(dst_knots))
-    push!(intervals, interval₁)
-    push!(intervals, interval₂)
+    if lb != first(src_knots)
+        interval₁ = Interval{:closed, :open}(lb, first(src_knots)) => ClosedInterval(first(dst_knots), first(dst_knots))
+        push!(intervals, interval₁)
+    end
+
+    if ub != last(src_knots)
+        interval₂ = Interval{:open, :closed}(last(src_knots), ub) => ClosedInterval(last(dst_knots), last(dst_knots))
+        push!(intervals, interval₂)
+    end   
+  
     return intervals
 end
 
@@ -306,8 +312,8 @@ function (f::PiecewiseLinearStretching)(out::GenericGrayImage, img::GenericGrayI
     rs = zeros(Float64, N)
     os = zeros(Float64, N)
     for (n, (src, dst)) in enumerate(f.intervals) 
-        (A,B) = endpoints(src)
-        (a,b) = endpoints(dst)   
+        (A,B) = Float64.(endpoints(src))
+        (a,b) = Float64.(endpoints(dst))   
         rs[n] = (b - a) / (B - A)
         os[n] = (A*b - B*a) / (B - A)
     end

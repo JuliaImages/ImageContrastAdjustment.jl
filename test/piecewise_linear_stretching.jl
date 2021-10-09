@@ -6,10 +6,16 @@
         @test_throws ArgumentError PiecewiseLinearStretching((0, 0.2, 0.2, 1), (0.0, 0, 0, 1))   
         @test_throws ArgumentError PiecewiseLinearStretching(src_knots = (0, 0.2, 1), dst_knots = (0.0, 0, 0, 1))
         @test_throws ArgumentError PiecewiseLinearStretching(src_knots = (0,), dst_knots = (1,))
-        @test_throws ArgumentError PiecewiseLinearStretching(Percentiles(10,50, 100,150), (0, 0.5, 1), img)
+        @test_throws ArgumentError PiecewiseLinearStretching(Percentiles(10, 50, 100, 150), (0, 0.5, 1), img)
+        @test_throws ArgumentError PiecewiseLinearStretching((0, 1), Percentiles(0, 0.5, 1), img)
+        @test_throws ArgumentError PiecewiseLinearStretching(Percentiles(10, 50, 100, 150), Percentiles(0, 100), img)
     end
 
     @testset "miscellaneous" begin
+        # An image that consists of a single intensity gives rise to a degenerate source
+        # interval. 
+        @test_throws DomainError PiecewiseLinearStretching(MinMax(), (0, 1), ones(10,10))
+
         # We should be able to invert the image. 
          f = PiecewiseLinearStretching((0, 1), (1, 0))   
          for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
@@ -29,8 +35,8 @@
 
         # Setting the src_intervals equal to the dst_intervals should result in an identity
         # mapping (no change to the image) provided that the src_intervals span the entire
-        # permissible contrast range, i.e. the unit interval. 
-        f = PiecewiseLinearStretching((0, 0.3, 0.8 , 1.0), (0, 0.3, 0.8, 1.0))
+        # permissible contrast range, i.e. the unit interval.  
+        f = PiecewiseLinearStretching((0, 0.3, 0.8 , 1.0), (0, 0.3, 0.8, 1.0))       
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
             img = T.(testimage("mandril_gray"))
             ret = adjust_histogram(img, f)
@@ -53,7 +59,7 @@
         # entire permissible contrast range, i.e. the unit interval, then the resulting
         # image will match the original image because pixels that fall outside the
         # specified src_intervals are not saturated to the edge value of src_intervals if
-        # saturate = false
+        # saturate = false.
         f = PiecewiseLinearStretching([0.3, 0.8], [0.3, 0.8]; saturate = false )
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
             img = T.(testimage("mandril_gray"))
@@ -72,6 +78,42 @@
             maxval = maximum(img)
             f = PiecewiseLinearStretching((minval..maxval => minval..maxval,))   
             ret =  adjust_histogram(img, f)
+            if T <: Gray{Float32} || T <: Gray{Float64}
+                @test all(map((i, r) -> isapprox(i, r), img, ret))
+            else
+                @test ret == img
+            end
+            #MinMax & Tuple.
+            f = PiecewiseLinearStretching(MinMax(), (minval, maxval), img)
+            ret = adjust_histogram(img, f)
+            @test ret ≈  img
+            if T <: Gray{Float32} || T <: Gray{Float64}
+                @test all(map((i, r) -> isapprox(i, r), img, ret))
+            else
+                @test ret == img
+            end
+            # Tuple & MinMax.
+            f = PiecewiseLinearStretching((minval, maxval), MinMax(), img)
+            ret = adjust_histogram(img, f)
+            @test ret ≈  img
+            if T <: Gray{Float32} || T <: Gray{Float64}
+                @test all(map((i, r) -> isapprox(i, r), img, ret))
+            else
+                @test ret == img
+            end
+            # Tuple & Vector.
+            f = PiecewiseLinearStretching((minval, maxval), [minval, maxval])
+            ret = adjust_histogram(img, f)
+            @test ret ≈  img
+            if T <: Gray{Float32} || T <: Gray{Float64}
+                @test all(map((i, r) -> isapprox(i, r), img, ret))
+            else
+                @test ret == img
+            end
+            # Vector & Tuple.
+            f = PiecewiseLinearStretching([minval, maxval], (minval, maxval))
+            ret = adjust_histogram(img, f)
+            @test ret ≈  img
             if T <: Gray{Float32} || T <: Gray{Float64}
                 @test all(map((i, r) -> isapprox(i, r), img, ret))
             else
@@ -118,7 +160,7 @@
             @test minimum(ret) >= 0.2 
             @test maximum(ret) <= 0.8 
 
-            # Verify that results are correctly clamped to [0.2, 0.9] if it exceeds the range
+            # Verify that results are correctly clamped to [0.2, 0.9] if it exceeds the range.
             f = PiecewiseLinearStretching((0.3, 0.8), (0.2, 0.9))
             ret = adjust_histogram(img, f)
             @test eltype(ret) == eltype(img)
@@ -126,7 +168,7 @@
             @test maximum(ret) == T(0.9)  
         end
 
-        # Verify that Percentiles and MinMax works correctly
+        # Verify that Percentiles and MinMax works correctly.
         for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})   
             img = T.(collect(reshape(1/100:1/100:1, 10, 10)))
             f = PiecewiseLinearStretching(Percentiles((10,90)), MinMax(), img) 
