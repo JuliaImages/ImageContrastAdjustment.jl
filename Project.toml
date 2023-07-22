@@ -10,12 +10,14 @@ ImageTransformations = "02fcd773-0e25-5acc-982a-7f6622650795"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 
 [compat]
+ImageBase = "0.1"
 ImageCore = "0.9.3, 0.10"
 ImageTransformations = "0.8.1, 0.9, 0.10"
 Parameters = "0.12"
 julia = "1"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -23,4 +25,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestImages = "5e47fb64-e119-507b-a336-dd2b206d9990"
 
 [targets]
-test = ["Test", "ImageFiltering", "TestImages", "ImageMagick", "LinearAlgebra"]
+test = ["Test", "Aqua", "ImageFiltering", "TestImages", "ImageMagick", "LinearAlgebra"]
