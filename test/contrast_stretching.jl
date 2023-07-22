@@ -1,3 +1,7 @@
+using ImageCore
+using ImageContrastAdjustment
+using Test
+
 @testset "Contrast Stretching" begin
 
     for T in (Gray{N0f8}, Gray{N0f16}, Gray{Float32}, Gray{Float64})
@@ -21,6 +25,9 @@
         @test nonzero_before < nonzero_after
         @test nonzero_after == 16
         @test eltype(img) == eltype(ret)
+        if eltype(T) <: FixedPoint
+            @test ret ≈ T.(adjust_histogram(float.(img), ContrastStretching(t = 0.4, slope = 17)))
+        end
 
         #=
         Verify that the function can cope with a NaN value.
@@ -76,4 +83,9 @@
         edges, counts_after = build_histogram(ret, 16, minval = 0, maxval = 1)
         @test sum(counts_after .!= 0) == 2
     end
+
+    # Issue #58
+    img = Gray{N0f8}.([1 0; 0 1])
+    @test adjust_histogram(img, ContrastStretching(t=0.3, slope=0.4)) ==
+          Gray{N0f8}.(adjust_histogram(float.(img), ContrastStretching(t=0.3, slope=0.4, ϵ=eps(N0f8))))
 end
