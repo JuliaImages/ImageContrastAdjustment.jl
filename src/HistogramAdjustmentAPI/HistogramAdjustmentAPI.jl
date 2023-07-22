@@ -5,7 +5,7 @@ module HistogramAdjustmentAPI
 using ImageCore # ColorTypes is sufficient
 
 # TODO Relax this to all image color types
-const GenericGrayImage = AbstractArray{<:Union{Number, AbstractGray}}
+using ..ImageContrastAdjustment: GenericGrayImage
 
 """
     AbstractImageAlgorithm

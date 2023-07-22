@@ -52,7 +52,7 @@ function construct_pdfs(img::GenericGrayImage, targetimg::AbstractArray, nbins::
     if eltype(img) <: AbstractGray
         imin, imax = 0, 1
     else
-        imin, imax = min(minfinite(img), minfinite(targetimg)), max(maxfinite(img), maxfinite(targetimg))
+        imin, imax = min(minimum_finite(img), minimum_finite(targetimg)), max(maximum_finite(img), maximum_finite(targetimg))
     end
     edges, histogram = build_histogram(img, nbins, minval = imin, maxval = imax)
     _, target_histogram = build_histogram(targetimg, edges)
