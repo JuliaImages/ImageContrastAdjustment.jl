@@ -146,7 +146,7 @@ end
 function (f::LinearStretching)(out::GenericGrayImage, img::GenericGrayImage)
     T = eltype(out)
     FT = eltype(floattype(T))
-    img_min, img_max = minfinite(img), maxfinite(img)
+    img_min, img_max = minimum_finite(img), maximum_finite(img)
     # explicit annotation is needed because the ?: line mixes three value types:
     # Nothing, T, and typeof(f.src_minval)
     src_minval::FT = isnothing(f.src_minval) ? img_min : f.src_minval

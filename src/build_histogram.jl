@@ -147,8 +147,8 @@ edges, counts  = build_histogram(r, 256, minval = 0, maxval = 1)
 [1] E. Herrholz, "Parsimonious Histograms," Ph.D. dissertation, Inst. of Math. and Comp. Sci., University of Greifswald, Greifswald, Germany, 2011.
 """
 function build_histogram(img::GenericGrayImage, nbins::Integer = 256;
-                         minval::Union{Real,AbstractGray}=minfinite(img),
-                         maxval::Union{Real,AbstractGray}=maxfinite(img))
+                         minval::Union{Real,AbstractGray}=minimum_finite(img),
+                         maxval::Union{Real,AbstractGray}=maximum_finite(img))
     edges = partition_interval(nbins, minval, maxval)
     build_histogram(img, edges)
 end
@@ -172,8 +172,8 @@ build_histogram(img::AbstractArray{C}) where C<:Color{N0f8} =
     build_histogram(mappedarray(Gray{N0f8}, img))
 
 function build_histogram(img::AbstractArray{T}, nbins::Integer;
-                         minval::Union{Real,AbstractGray}=minfinite(img),
-                         maxval::Union{Real,AbstractGray}=maxfinite(img))  where T<:Union{N0f8, AbstractGray{N0f8}}
+                         minval::Union{Real,AbstractGray}=minimum_finite(img),
+                         maxval::Union{Real,AbstractGray}=maximum_finite(img))  where T<:Union{N0f8, AbstractGray{N0f8}}
     edgesraw, countsraw = build_histogram(img)
     return rebin(edgesraw, countsraw, nbins, minval, maxval)
 end
