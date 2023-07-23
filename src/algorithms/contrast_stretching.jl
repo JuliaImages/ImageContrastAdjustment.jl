@@ -66,11 +66,15 @@ ret = adjust_histogram(img, ContrastStretching(t = 0.6, slope = 3))
                                       T₂ <: Union{Real,AbstractGray}}  <: AbstractHistogramAdjustmentAlgorithm
      t::T₁ = 0.5
      slope::T₂ = 1.0
+     ϵ::Union{T₁,Nothing} = nothing
 end
+ContrastStretching(t::T₁, slope::T₂, ϵ::Union{Real,AbstractGray}) where {T₁ <: Union{Real,AbstractGray},
+                                             T₂ <: Union{Real,AbstractGray}} =
+    ContrastStretching{T₁,T₂}(t, slope, T₁(ϵ))
 
 function (f::ContrastStretching)(out::GenericGrayImage, img::GenericGrayImage)
     T = eltype(out)
-    ϵ = eps(T)
+    ϵ = f.ϵ === nothing ? eps(T) : f.ϵ
     out .= img
     map!(out,out) do val
         if isnan(val)
@@ -96,3 +100,4 @@ end
 function contrast_stretch(x, t, s, ϵ)
     return 1 / (1 + (t / (x+ϵ))^s)
 end
+contrast_stretch(x::Union{FixedPoint,AbstractGray{<:FixedPoint}}, t, s, ϵ) = contrast_stretch(float(x), t, s, ϵ)
