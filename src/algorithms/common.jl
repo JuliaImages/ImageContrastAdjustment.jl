@@ -3,7 +3,7 @@ function transform_density!(out::GenericGrayImage, img::GenericGrayImage, edges:
     first_newval, last_newval = first(newvals), last(newvals)
     inv_step_size = 1/step(edges)
     function transform(val)
-        val = gray(val)
+        val = intensity(val)
         if val >= last_edge
             return last_newval
         elseif val < first_edge
