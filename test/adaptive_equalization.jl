@@ -124,8 +124,9 @@
 end
 
 @testset "CLAHE regression: Avoid failure on Gray{N0f8} images " begin 
-    # https://github.com/JuliaImages/ImageContrastAdjustment.jl/issues/64
+    # https://github.com/JuliaImages/ImageContrastAdjustment.jl/issues/64    
     rng = StableRNG(123)
+    # A sufficiently large random image would previously trigger the same issue as reported above
     img = Gray{N0f8}.([only(rand(rng,1)) for r = 1:600, c = 1:600])
     algo = AdaptiveEqualization( nbins = 256, minval = 0, maxval = 1, rblocks = 4, cblocks = 4, clip = 0.2)
     imgeq = adjust_histogram(img, algo)
