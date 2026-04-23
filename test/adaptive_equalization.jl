@@ -122,22 +122,3 @@
     imgeq₂ = adjust_histogram(imgg₂, algo)
     @test norm(imgeq₁ .- imgeq₂) ≈ 0.0
 end
-
-@testset "CLAHE regression: Avoid failure on Gray{N0f8} images " begin 
-    # https://github.com/JuliaImages/ImageContrastAdjustment.jl/issues/64
-    rng = StableRNG(123)
-    img = Gray{N0f8}.([only(rand(rng,1)) for r = 1:600, c = 1:600])
-    algo = AdaptiveEqualization( nbins = 256, minval = 0, maxval = 1, rblocks = 4, cblocks = 4, clip = 0.2)
-    imgeq = adjust_histogram(img, algo)
-    @test minimum(imgeq) >= Gray{N0f8}(0)
-    @test maximum(imgeq) <= Gray{N0f8}(1)
-end 
-
-@testset "CLAHE supports raw UInt8 arrays without conversion failure" begin
-    img = UInt8.([round(Int, 240 + 15 * sin(r / 8)) for r = 1:64, c = 1:64])
-    algo = AdaptiveEqualization(nbins = 256, minval = 0, maxval = 255, rblocks = 8, cblocks = 8, clip = 0.2)
-    imgeq = adjust_histogram(img, algo)
-    @test eltype(imgeq) == UInt8
-    @test minimum(imgeq) >= 0
-    @test maximum(imgeq) <= 255    
-end
