@@ -144,7 +144,7 @@ function match_pdf!(img::GenericGrayImage, edges::AbstractArray, pdf::AbstractAr
     first_edge = first(edges)
     last_edge = last(edges)
     map!(img, img) do val
-        val = intensity(val)
+        val = gray(val)
         if isnan(val)
             return val
         else
