@@ -417,8 +417,9 @@ function perform_iterative_redistribution!(histogram::AbstractArray, limit::Numb
 end
 
 
+
 function apply_cdf_transform(val::Union{Real,AbstractGray}, minval::Union{Real,AbstractGray}, maxval::Union{Real,AbstractGray}, edges::AbstractArray, cdf::AbstractArray)
-    val, minval, maxval = gray(val), gray(minval), gray(maxval)
+    val, minval, maxval = intensity(val), intensity(minval), intensity(maxval)
 
     first_edge = first(edges)
     inv_step_size = 1 / step(edges)
@@ -494,13 +495,25 @@ function transform_image!(out, img, block_centroid_r, block_centroid_c, block_wi
                       intensity_range, block_cdf)
 end
 
-function transform_interior!(out, img, bounds, block_centroids, block_dimensions, intensity_range, block_cdf)
+@inline integer_store(::Type{T}, x, lo, hi) where {T} = convert(T, clamp(ceil(x), lo, hi))
+@inline clamp_store(::Type{T}, x, lo, hi)   where {T} = convert(T, clamp(x, lo, hi))
+
+storefn(::Type{T}) where {T<:Integer} = integer_store
+storefn(::Type{T}) where {T} = clamp_store
+
+function transform_interior!(out::AbstractArray{T}, img, bounds, block_centroids, block_dimensions, intensity_range, block_cdf) where {T}
     rows, cols = bounds
     block_centroid_r, block_centroid_c = block_centroids
     block_width, block_height = block_dimensions
     minval, maxval = intensity_range
+
+    lo = intensity(minval)
+    hi = intensity(maxval)
+    store = storefn(T)
+
     inv_block_height = 1 / block_height
     inv_block_width = 1 / block_width
+
     for r in rows
         for c in cols
             rᵢ = round(Int, r * inv_block_height)
@@ -512,16 +525,22 @@ function transform_interior!(out, img, bounds, block_centroids, block_dimensions
             T₃ = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ + 1, cᵢ + 1]...)
             T₄ = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ, cᵢ + 1]...)
             interpolated_val = (1 - t)*(1 - u)*T₁ + t*(1 - u)*T₂  + t*u*T₃ + (1 - t)*u*T₄
-            out[r,c] = eltype(img) <: Integer ? ceil(interpolated_val) : interpolated_val
+            out[r,c] = store(T, interpolated_val, lo, hi)
         end
     end
 end
 
 
-function transform_vertical_strip!(out, img, bounds, block_centroid_r, cᵢ, block_height, intensity_range, block_cdf)
+function transform_vertical_strip!(out::AbstractArray{T}, img, bounds, block_centroid_r, cᵢ, block_height, intensity_range, block_cdf) where {T}
     rows, cols = bounds
     minval, maxval = intensity_range
+
+    lo = intensity(minval)
+    hi = intensity(maxval)
+    store = storefn(T)
+
     inv_block_height = 1 / block_height
+
     for r in rows
         for c in cols
             rᵢ = round(Int, r * inv_block_height)
@@ -529,16 +548,22 @@ function transform_vertical_strip!(out, img, bounds, block_centroid_r, cᵢ, blo
             T₁ = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ, cᵢ]...)
             T₂ = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ + 1, cᵢ]...)
             interpolated_val = (1 - t)*T₁ + t*T₂
-            out[r,c] = eltype(img) <: Integer ? ceil(interpolated_val) : interpolated_val
+            out[r,c] = store(T, interpolated_val, lo, hi)
         end
     end
 end
 
 
-function transform_horizontal_strip!(out, img, bounds, block_centroid_c, rᵢ, block_width, intensity_range, block_cdf)
+function transform_horizontal_strip!(out::AbstractArray{T}, img, bounds, block_centroid_c, rᵢ, block_width, intensity_range, block_cdf) where {T}
     rows, cols = bounds
     minval, maxval = intensity_range
+
+    lo = intensity(minval)
+    hi = intensity(maxval)
+    store = storefn(T)
+
     inv_block_width = 1 / block_width
+
     for r in rows
         for c in cols
             cᵢ = round(Int, c * inv_block_width)
@@ -546,19 +571,24 @@ function transform_horizontal_strip!(out, img, bounds, block_centroid_c, rᵢ, b
             T₁ = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ, cᵢ]...)
             T₂ = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ, cᵢ + 1]...)
             interpolated_val = (1 - u)*T₁ + u*T₂
-            out[r,c] = eltype(img) <: Integer ? ceil(interpolated_val) : interpolated_val
+            out[r,c] = store(T, interpolated_val, lo, hi)
         end
     end
 end
 
 
-function transform_corner!(out, img, bounds, rᵢ, cᵢ, intensity_range, block_cdf)
+function transform_corner!(out::AbstractArray{T}, img, bounds, rᵢ, cᵢ, intensity_range, block_cdf) where {T}
     rows, cols = bounds
     minval, maxval = intensity_range
+
+    lo = intensity(minval)
+    hi = intensity(maxval)
+    store = storefn(T)
+
     for r in rows
         for c in cols
             val = apply_cdf_transform(img[r,c], minval, maxval, block_cdf[rᵢ, cᵢ]...)
-            out[r,c] = eltype(img) <: Integer ? ceil(val) : val
+            out[r,c] = store(T, val, lo, hi)
         end
     end
 end

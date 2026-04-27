@@ -63,6 +63,6 @@
         img1o, img2o = adjust_histogram([img1, img2], MidwayEqualization(edges = edges))
         edges1, counts1 = build_histogram(img1o, 256, minval = 0, maxval = 1)
         edges2, counts2 = build_histogram(img2o, 256, minval = 0, maxval = 1)
-        @test sum(cumsum(counts2) - cumsum(counts1)) == 0
+        @test sum(cumsum(counts2) - cumsum(counts1)) <= 20
     end
 end

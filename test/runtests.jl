@@ -1,5 +1,5 @@
 using ImageContrastAdjustment
-using Test, ImageCore, ImageFiltering, TestImages, LinearAlgebra
+using Test, ImageCore, ImageFiltering, TestImages, LinearAlgebra, StableRNGs
 using Aqua
 
 if Base.VERSION >= v"1.6"
